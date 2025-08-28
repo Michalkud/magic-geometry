@@ -1,0 +1,136 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 13% 8%;           /* Deep midnight blue */
+    --foreground: 45 100% 85%;          /* Warm gold text */
+    --card: 220 15% 10%;                /* Darker card backgrounds */
+    --card-foreground: 45 90% 80%;      /* Softer gold */
+    --popover: 220 15% 10%;
+    --popover-foreground: 45 90% 80%;
+    --primary: 270 100% 70%;            /* Mystical purple */
+    --primary-foreground: 45 100% 95%;
+    --secondary: 220 20% 15%;           /* Dark surface */
+    --secondary-foreground: 45 80% 75%;
+    --muted: 220 25% 12%;
+    --muted-foreground: 45 60% 60%;
+    --accent: 45 100% 65%;              /* Gold accents */
+    --accent-foreground: 220 25% 15%;
+    --destructive: 0 75% 60%;           /* Death theme red */
+    --destructive-foreground: 45 100% 95%;
+    --border: 220 25% 20%;              /* Subtle borders */
+    --input: 220 25% 15%;
+    --ring: 270 100% 70%;               /* Purple focus rings */
+    --radius: 0.75rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html, body, #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    @apply bg-background text-foreground font-body;
+    background-image: 
+      radial-gradient(circle at 25% 25%, hsl(270, 30%, 8%) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, hsl(220, 25%, 5%) 0%, transparent 50%),
+      linear-gradient(135deg, hsl(220, 25%, 5%) 0%, hsl(270, 30%, 8%) 100%);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .mystical-card {
+    @apply bg-card/80 backdrop-blur-sm border border-border/50 shadow-2xl;
+    box-shadow: 
+      0 10px 30px hsl(270, 100%, 10% / 0.5),
+      0 0 0 1px hsl(45, 100%, 65% / 0.1),
+      inset 0 1px 0 hsl(45, 100%, 65% / 0.1);
+  }
+
+  .mystical-glow {
+    text-shadow: 0 0 10px hsl(45, 100%, 65% / 0.5);
+  }
+
+  .mystical-badge {
+    @apply bg-purple-900/20 border border-purple-500/30 text-amber-200;
+    backdrop-filter: blur(8px);
+    box-shadow: 
+      0 4px 12px hsl(270, 100%, 10% / 0.3),
+      0 0 0 1px hsl(270, 100%, 70% / 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .mystical-badge:hover {
+    @apply bg-purple-800/30 border-purple-400/50;
+    box-shadow: 
+      0 6px 20px hsl(270, 100%, 10% / 0.5),
+      0 0 20px hsl(270, 100%, 70% / 0.3);
+  }
+
+  .mystical-tabs {
+    @apply space-y-4;
+  }
+
+  .mystical-tabs [data-slot="tabs-list"] {
+    @apply bg-secondary/50 backdrop-blur-sm border border-border/30;
+  }
+
+  .mystical-tabs [data-slot="tabs-trigger"] {
+    @apply text-muted-foreground;
+    transition: all 0.3s ease;
+  }
+
+  .mystical-tabs [data-slot="tabs-trigger"][data-state="active"] {
+    @apply bg-primary/20 text-foreground border-primary/50;
+    box-shadow: 0 0 15px hsl(270, 100%, 70% / 0.3);
+  }
+
+  .card-artwork {
+    @apply relative overflow-hidden rounded-2xl;
+    background: linear-gradient(145deg, hsl(220, 15%, 8%), hsl(270, 20%, 10%));
+    box-shadow: 
+      0 20px 40px hsl(270, 100%, 5% / 0.8),
+      0 0 0 1px hsl(45, 100%, 65% / 0.2),
+      inset 0 1px 0 hsl(45, 100%, 65% / 0.1);
+  }
+
+  .hebrew-letter {
+    @apply text-amber-300 drop-shadow-lg;
+    text-shadow: 
+      0 0 20px hsl(45, 100%, 65% / 0.8),
+      2px 2px 4px hsl(220, 100%, 5% / 0.8);
+  }
+
+  .card-title {
+    @apply text-amber-100 font-mystical;
+    text-shadow: 
+      0 0 15px hsl(45, 100%, 85% / 0.6),
+      2px 2px 4px hsl(220, 100%, 5% / 0.8);
+  }
+
+  .section-header {
+    @apply font-mystical text-lg text-foreground mb-4;
+    border-bottom: 1px solid hsl(45, 100%, 65% / 0.2);
+    padding-bottom: 0.5rem;
+    background: linear-gradient(90deg, hsl(45, 100%, 65%), hsl(270, 100%, 70%));
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .color-scale {
+    @apply rounded-full overflow-hidden shadow-inner;
+    box-shadow: inset 0 2px 4px hsl(220, 100%, 5% / 0.3);
+  }
+}
+
+

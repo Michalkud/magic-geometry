@@ -1,0 +1,182 @@
+{
+  "id": "trump_00_fool",
+  "name": "The Fool",
+  "number": 0,
+  "titles": ["The Spirit of Aether"],
+  "deck": "Thoth",
+  "type": "major",
+  "image": {
+    "src": "/cards/thoth/00-fool.jpg",
+    "copyright": "Thoth deck artwork © Ordo Templi Orientis",
+    "rwsSrc": "/rws/RWS_Tarot_00_Fool.jpg"
+  },
+  "correspondences": {
+    "hebrew_letter": "Aleph",
+    "hebrew_value": "א",
+    "path_number": 11,
+    "path_name": "The Scintillating Intelligence",
+    "sephiroth_from": "Kether",
+    "sephiroth_to": "Chokmah",
+    "element": "Air",
+    "astrology": {
+      "type": "elemental",
+      "sign": null,
+      "planet": null,
+      "decan": null
+    },
+    "alchemy": ["Mercury (volatility)", "Prima Materia", "Quintessence"],
+    "color_scales": {
+      "king": ["Bright pale yellow"],
+      "queen": ["Sky blue"],
+      "emperor": ["Blue emerald green"],
+      "empress": ["Emerald flecked gold"]
+    },
+    "magical_weapon": "Dagger or Fan",
+    "perfume": "Galbanum",
+    "drug": "Peppermint",
+    "plant": "Aspen",
+    "animal": "Eagle, Man",
+    "mineral": "Topaz",
+    "lineal_figure": "Patchwork of all colors"
+  },
+  "symbols": [
+    {
+      "key": "green-child",
+      "polygon": [[0.4, 0.3], [0.6, 0.3], [0.6, 0.6], [0.4, 0.6]],
+      "meanings": ["Innocence", "New beginnings", "Pure potential", "Harpocrates"],
+      "links": ["element:Air", "letter:Aleph", "path:1-2", "card:Aeon"],
+      "note": "The divine child stepping into manifestation with perfect trust"
+    },
+    {
+      "key": "crocodile",
+      "polygon": [[0.3, 0.7], [0.5, 0.7], [0.5, 0.85], [0.3, 0.85]],
+      "meanings": ["Primal waters", "Unconscious", "Raw survival", "Sebek"],
+      "links": ["element:Water", "sephira:Malkuth", "card:Hanged-Man"],
+      "note": "Sebek, the crocodile god, representing material dangers and the devouring aspect of nature"
+    },
+    {
+      "key": "dove",
+      "polygon": [[0.25, 0.15], [0.35, 0.15], [0.35, 0.25], [0.25, 0.25]],
+      "meanings": ["Spirit descending", "Peace", "Holy Ghost", "Pneuma"],
+      "links": ["element:Air", "sephira:Kether", "card:Ace-Cups"],
+      "note": "The dove of the Holy Spirit descending into matter"
+    },
+    {
+      "key": "butterfly",
+      "polygon": [[0.65, 0.2], [0.75, 0.2], [0.75, 0.3], [0.65, 0.3]],
+      "meanings": ["Transformation", "Psyche", "Metamorphosis", "Soul"],
+      "links": ["element:Air", "card:Death", "card:Art"],
+      "note": "The soul in transformation through experience"
+    },
+    {
+      "key": "tiger",
+      "polygon": [[0.55, 0.65], [0.7, 0.65], [0.7, 0.8], [0.55, 0.8]],
+      "meanings": ["Desire", "Instinct", "Raw energy", "Dionysian force"],
+      "links": ["element:Fire", "card:Lust", "sephira:Geburah"],
+      "note": "Untamed desire and primal life force"
+    },
+    {
+      "key": "vulture",
+      "polygon": [[0.15, 0.35], [0.3, 0.35], [0.3, 0.5], [0.15, 0.5]],
+      "meanings": ["Mother goddess", "Death/rebirth", "Mut", "Maut"],
+      "links": ["element:Water", "card:Death", "sephira:Binah"],
+      "note": "The vulture goddess Mut, representing the primal mother"
+    },
+    {
+      "key": "caduceus",
+      "polygon": [[0.45, 0.45], [0.55, 0.45], [0.55, 0.65], [0.45, 0.65]],
+      "meanings": ["Balance", "Mercury", "Healing", "Kundalini"],
+      "links": ["planet:Mercury", "card:Magus", "path:1-3"],
+      "note": "The caduceus showing balanced currents of energy"
+    },
+    {
+      "key": "sun-disk",
+      "polygon": [[0.7, 0.05], [0.85, 0.05], [0.85, 0.2], [0.7, 0.2]],
+      "meanings": ["Solar consciousness", "Ra", "Divine light", "Spiritual sun"],
+      "links": ["planet:Sun", "card:Sun", "sephira:Tiphareth"],
+      "note": "The solar disk of spiritual illumination behind manifestation"
+    },
+    {
+      "key": "spiral",
+      "polygon": [[0.35, 0.4], [0.45, 0.4], [0.45, 0.5], [0.35, 0.5]],
+      "meanings": ["Evolution", "DNA", "Life force", "Expansion"],
+      "links": ["element:Air", "card:Universe", "path:All"],
+      "note": "The spiral of evolution and involution"
+    },
+    {
+      "key": "grapes",
+      "polygon": [[0.5, 0.55], [0.6, 0.55], [0.6, 0.65], [0.5, 0.65]],
+      "meanings": ["Abundance", "Dionysus", "Ecstasy", "Wine of life"],
+      "links": ["element:Water", "card:Cups-9", "sephira:Yesod"],
+      "note": "Grapes of Dionysian ecstasy and material abundance"
+    },
+    {
+      "key": "coins",
+      "polygon": [[0.6, 0.7], [0.7, 0.7], [0.7, 0.8], [0.6, 0.8]],
+      "meanings": ["Material world", "Manifestation", "Value", "Exchange"],
+      "links": ["element:Earth", "suit:Disks", "sephira:Malkuth"],
+      "note": "Coins representing material manifestation as byproduct of spiritual journey"
+    }
+  ],
+  "meanings": {
+    "upright": [
+      "New beginnings",
+      "Innocence and spontaneity",
+      "Free spirit",
+      "Trust in life",
+      "Leap of faith"
+    ],
+    "reversed": [
+      "Recklessness",
+      "Risk-taking without awareness",
+      "Foolishness",
+      "Lack of direction",
+      "Poor judgment"
+    ],
+    "essence": "The Fool represents the unconditioned creative impulse before it takes form. As Aleph, the breath of life, it is pure potential stepping into manifestation with divine madness and perfect trust."
+  },
+  "essay": "The Fool, numbered 0, stands both at the beginning and the end of the Major Arcana, representing the eternal cycle of experience. Attributed to Air and the Hebrew letter Aleph (meaning Ox, but esoterically the breath of life), The Fool embodies the primal creative impulse that precedes all manifestation.\n\nIn the Thoth deck, Crowley and Harris present The Fool as a young, green figure - the divine child Harpocrates or the Green Man of spring - stepping confidently toward the edge of a precipice. This is not ignorance but divine innocence, the willingness to embrace experience without the burden of preconception.\n\nThe symbolism is rich with paradox: the crocodile of material danger lurks below, yet the figure carries the symbols of highest spiritual attainment. The dove descends as spirit entering matter, while butterflies suggest the transformation that experience brings. The tiger represents untamed desire, the vulture the mother goddess who devours and gives birth.\n\nThe Fool carries a bag containing all potential experiences, suspended from a wand that suggests the phallus of creation. The spiral force emanates from the figure, showing the whirling motion of manifestation from the unmanifest. Coins and grapes hang from the figure, showing that material abundance comes as a natural result of following one's true path, not as a goal in itself.\n\nAs Path 11 on the Tree of Life, The Fool connects Kether (the Crown) to Chokmah (Wisdom), representing the first emanation from pure being into dynamic force. This is the path of the Scintillating Intelligence, where undifferentiated light first begins to sparkle with the possibility of form.\n\nIn divination, The Fool often indicates a time for new beginnings, for taking risks, for trusting in the process of life. It suggests approaching situations with beginner's mind, free from the weight of past experience. The querent may be called to make a leap of faith, to trust their intuition over logic, or to embrace a childlike wonder about life's possibilities.",
+  "quotes": [
+    {
+      "text": "The Fool is the negative issuing into manifestation; its eternal number is 0.",
+      "source": "The Book of Thoth",
+      "page": 53
+    },
+    {
+      "text": "He is the Green Man of spring, the Holy Ghost, the Saint-Esprit of the Grail Legends.",
+      "source": "The Book of Thoth",
+      "page": 54
+    }
+  ],
+  "cross_references": [
+    "card:Magus",
+    "card:Universe",
+    "card:Aeon",
+    "hebrew:Aleph",
+    "path:11",
+    "sephira:Kether",
+    "sephira:Chokmah",
+    "element:Air"
+  ],
+  "practice_notes": "When The Fool appears, consider what new adventure is calling you. What leap of faith is required? Where in your life do you need to approach things with fresh eyes, unburdened by past failures or successes? The Fool reminds us that every master was once a disaster, and that the willingness to look foolish is often the price of genuine discovery.",
+  "sources": [
+    {
+      "title": "The Book of Thoth",
+      "author": "Aleister Crowley",
+      "url": "https://hermetic.com/crowley/book-of-thoth/index"
+    },
+    {
+      "title": "Understanding Aleister Crowley's Thoth Tarot",
+      "author": "Lon Milo DuQuette",
+      "isbn": "978-1578632763"
+    },
+    {
+      "title": "Liber 777",
+      "author": "Aleister Crowley",
+      "url": "https://hermetic.com/crowley/777/table-i"
+    }
+  ],
+  "created_at": "2024-01-20T12:00:00Z",
+  "updated_at": "2024-01-20T12:00:00Z",
+  "version": "2.0.0"
+}

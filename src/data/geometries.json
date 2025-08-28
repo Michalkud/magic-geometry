@@ -1,0 +1,211 @@
+{
+  "geometries": [
+    {
+      "id": "flower_of_life",
+      "name": "Flower of Life",
+      "type": "pattern",
+      "description": "Sacred geometric pattern of overlapping circles forming a flower-like pattern",
+      "params": {
+        "rings": 3,
+        "centerX": 0.5,
+        "centerY": 0.5,
+        "radius": 0.15
+      }
+    },
+    {
+      "id": "vesica_piscis",
+      "name": "Vesica Piscis",
+      "type": "pattern",
+      "description": "The intersection of two circles, representing the womb of creation",
+      "params": {
+        "centerX1": 0.4,
+        "centerY1": 0.5,
+        "centerX2": 0.6,
+        "centerY2": 0.5,
+        "radius": 0.2
+      }
+    },
+    {
+      "id": "metatrons_cube",
+      "name": "Metatron's Cube",
+      "type": "graph",
+      "description": "Sacred geometry containing all Platonic solids",
+      "params": {
+        "centerX": 0.5,
+        "centerY": 0.5,
+        "size": 0.4
+      }
+    },
+    {
+      "id": "tetractys",
+      "name": "Tetractys",
+      "type": "points",
+      "description": "Pythagorean triangular figure of ten points in four rows",
+      "params": {
+        "rows": 4,
+        "centerX": 0.5,
+        "centerY": 0.4,
+        "spacing": 0.08
+      }
+    },
+    {
+      "id": "tree_of_life",
+      "name": "Tree of Life",
+      "type": "graph",
+      "description": "The Kabbalistic Tree of Life with 10 Sephiroth and 22 paths",
+      "params": {
+        "layout": "traditional",
+        "showPaths": true,
+        "showSephiroth": true,
+        "showVeils": true
+      }
+    },
+    {
+      "id": "pentagram",
+      "name": "Pentagram",
+      "type": "polygon",
+      "description": "Five-pointed star representing the microcosm",
+      "params": {
+        "points": 5,
+        "centerX": 0.5,
+        "centerY": 0.5,
+        "radius": 0.3,
+        "rotation": -18
+      }
+    },
+    {
+      "id": "hexagram",
+      "name": "Hexagram",
+      "type": "polygon",
+      "description": "Six-pointed star representing the macrocosm",
+      "params": {
+        "points": 6,
+        "centerX": 0.5,
+        "centerY": 0.5,
+        "radius": 0.3,
+        "rotation": 0
+      }
+    },
+    {
+      "id": "fibonacci_spiral",
+      "name": "Fibonacci Spiral",
+      "type": "spiral",
+      "description": "Golden ratio spiral found throughout nature",
+      "params": {
+        "startX": 0.5,
+        "startY": 0.5,
+        "turns": 3,
+        "scale": 0.1
+      }
+    },
+    {
+      "id": "seed_of_life",
+      "name": "Seed of Life",
+      "type": "pattern",
+      "description": "Seven circles forming the genesis pattern",
+      "params": {
+        "centerX": 0.5,
+        "centerY": 0.5,
+        "radius": 0.1
+      }
+    },
+    {
+      "id": "sri_yantra",
+      "name": "Sri Yantra",
+      "type": "graph",
+      "description": "Sacred geometry of nine interlocking triangles",
+      "params": {
+        "centerX": 0.5,
+        "centerY": 0.5,
+        "size": 0.4,
+        "style": "traditional"
+      }
+    },
+    {
+      "id": "platonic_tetrahedron",
+      "name": "Tetrahedron",
+      "type": "solid",
+      "description": "Fire element - 4 faces, 4 vertices, 6 edges",
+      "params": {
+        "vertices": 4,
+        "faces": 4,
+        "edges": 6,
+        "element": "Fire"
+      }
+    },
+    {
+      "id": "platonic_cube",
+      "name": "Cube/Hexahedron",
+      "type": "solid",
+      "description": "Earth element - 6 faces, 8 vertices, 12 edges",
+      "params": {
+        "vertices": 8,
+        "faces": 6,
+        "edges": 12,
+        "element": "Earth"
+      }
+    },
+    {
+      "id": "platonic_octahedron",
+      "name": "Octahedron",
+      "type": "solid",
+      "description": "Air element - 8 faces, 6 vertices, 12 edges",
+      "params": {
+        "vertices": 6,
+        "faces": 8,
+        "edges": 12,
+        "element": "Air"
+      }
+    },
+    {
+      "id": "platonic_dodecahedron",
+      "name": "Dodecahedron",
+      "type": "solid",
+      "description": "Spirit/Aether element - 12 faces, 20 vertices, 30 edges",
+      "params": {
+        "vertices": 20,
+        "faces": 12,
+        "edges": 30,
+        "element": "Spirit"
+      }
+    },
+    {
+      "id": "platonic_icosahedron",
+      "name": "Icosahedron",
+      "type": "solid",
+      "description": "Water element - 20 faces, 12 vertices, 30 edges",
+      "params": {
+        "vertices": 12,
+        "faces": 20,
+        "edges": 30,
+        "element": "Water"
+      }
+    }
+  ],
+  "overlayModes": [
+    {
+      "id": "multiply",
+      "name": "Multiply",
+      "blendMode": "multiply",
+      "opacity": 0.3
+    },
+    {
+      "id": "screen",
+      "name": "Screen",
+      "blendMode": "screen",
+      "opacity": 0.4
+    },
+    {
+      "id": "overlay",
+      "name": "Overlay",
+      "blendMode": "overlay",
+      "opacity": 0.5
+    },
+    {
+      "id": "soft-light",
+      "name": "Soft Light",
+      "blendMode": "soft-light",
+      "opacity": 0.6
+    }
+  ]
+}
