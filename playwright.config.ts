@@ -5,14 +5,14 @@ export default defineConfig({
   timeout: 60_000,
   retries: 1,
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://localhost:4173',
     headless: true,
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'npm run build && npm run preview',
-    url: 'http://localhost:5173',
-    reuseExistingServer: true,
+    command: 'npm run build && npx vite preview --port 4173',
+    url: 'http://localhost:4173',
+    reuseExistingServer: false,
   },
   projects: [
     {

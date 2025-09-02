@@ -30,7 +30,11 @@ coverage/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.generate
 
 # OS generated files
 Thumbs.db
 .directory
+
+# Generation script progress
+scripts/generation-progress.json

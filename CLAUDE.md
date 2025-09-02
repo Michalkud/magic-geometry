@@ -1,42 +1,26 @@
-# Project Rules for Claude
+# Development Rules
 
-## Testing Requirements
-**IMPORTANT**: Always test everything with Playwright after finishing any task involving UI changes or new features. This ensures that all functionality works correctly and catches any issues before they affect the user experience.
+## Core Principles
+- **KISS** - Choose the simplest solution
+- **DRY** - Avoid code duplication  
+- **YAGNI** - Don't add functionality until needed
 
-**MANDATORY**: 
-- Create tests for any new functionality implemented
-- Run all tests after completing any implementation task
-- Ensure all tests pass before considering a task complete
+## TDD Workflow
+1. **Research**: Check documentation online or via Context7 BEFORE planning
+2. **Plan**: Create minimal `.md` file with ONLY requested feature
+3. **Test**: Write Playwright tests BEFORE implementation
+4. **Clean**: Review and refactor existing code based on Clean Code principles
+5. **Code**: Implement minimum code to pass tests
 
-## Documentation Update Requirements
-**MANDATORY**: After finishing ANY task or feature implementation, you MUST:
-- Update @PROJECT_DOCUMENTATION.md to reflect new components, features, and architectural changes
-- Update @IMPLEMENTATION_TASKS.md to mark completed tasks and update progress tracking
-- Add new components to the file structure documentation
-- Document any new testing files created
+## Testing
+- Write tests first, code second
+- Run all tests after implementation
 
-## Project Overview
-This is a mystical Tree of Life application featuring Thoth Tarot cards with interactive visualizations.
+## Documentation
+- Update PROJECT_DOCUMENTATION.md after ANY new feature or code update
+- Keep documentation current with all changes
+- Store distilled chat history in PROJECT_HISTORY.md after completing features
 
-## Key Features
-- Tree of Life with Sephiroth visualization
-- Thoth Tarot card attributions
-- Image-filled paths showing card artwork
-- Interactive card modal with drill-down navigation
-- Mystical dark theme with golden accents
-- Organized card layout by pillars
-
-## Technical Stack
-- React with TypeScript
-- Vite for development
-- React Router for navigation
-- shadcn/ui components
-- Tailwind CSS for styling
-- Framer Motion for animations
-
-## Development Guidelines
-1. Always test UI changes with Playwright
-2. Use mystical styling consistently (dark theme, golden text, Cinzel font)
-3. Maintain responsive design
-4. Follow existing component patterns
-5. Test all interactive features (clicks, hovers, navigation)
+## Rule Suggestions
+- Proactively suggest new rules when patterns emerge that could speed development
+- Always provide justification and ask permission before adding

@@ -188,18 +188,18 @@ export default function CorrespondenceRail({
           >
             Card Details
           </Link>
-          <button
+          <Link
+            to="/"
             className="px-2 py-1 text-[10px] rounded-full bg-violet-500/10 text-violet-300 border border-violet-500/20 hover:bg-violet-500/20 transition-colors"
-            onClick={() => console.log('Navigate to Tree path')}
           >
             View on Tree
-          </button>
-          <button
+          </Link>
+          <Link
+            to={`/card/${cardId}`}
             className="px-2 py-1 text-[10px] rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 hover:bg-amber-500/20 transition-colors"
-            onClick={() => console.log('Study this card')}
           >
             Study Mode
-          </button>
+          </Link>
         </div>
       </div>
     </div>

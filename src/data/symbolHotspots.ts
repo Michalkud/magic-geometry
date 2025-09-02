@@ -1,5 +1,29 @@
 import { SymbolHotspot } from '@/components/CardCanvas';
 
+// Rectangle-based hotspot structure for precise symbol location
+export interface RectangleHotspot {
+  key: string;
+  rectangle: {
+    x1: number; // normalized 0-1
+    y1: number; // normalized 0-1
+    x2: number; // normalized 0-1  
+    y2: number; // normalized 0-1
+  };
+  meanings: string[];
+  links: string[];
+  note?: string;
+}
+
+// Convert rectangle to polygon for compatibility with existing CardCanvas
+export function rectangleToPolygon(rect: { x1: number; y1: number; x2: number; y2: number }): number[][] {
+  return [
+    [rect.x1, rect.y1],
+    [rect.x2, rect.y1],
+    [rect.x2, rect.y2],
+    [rect.x1, rect.y2],
+  ];
+}
+
 // Symbol hotspot coordinates for cards (normalized 0-1)
 // These would ideally be created with an annotation tool
 export const CARD_HOTSPOTS: Record<string, SymbolHotspot[]> = {
