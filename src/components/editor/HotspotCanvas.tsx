@@ -15,6 +15,7 @@ export interface HotspotCanvasProps {
   hotspots: Rectangle[];
   selectedHotspot?: string | null;
   isPreviewMode?: boolean;
+  showSymbolStatus?: boolean;
   onHotspotsChange: (hotspots: Rectangle[]) => void;
   onHotspotSelect: (id: string | null) => void;
   onCoordinateChange?: (coords: { x1: number; y1: number; x2: number; y2: number } | null) => void;
@@ -26,6 +27,7 @@ export default function HotspotCanvas({
   hotspots,
   selectedHotspot,
   isPreviewMode = false,
+  showSymbolStatus = false,
   onHotspotsChange,
   onHotspotSelect,
   onCoordinateChange,
@@ -258,40 +260,48 @@ export default function HotspotCanvas({
           const isBeingDragged = draggingHotspotId === hotspot.id;
           const isHovered = hoveredHotspot === hotspot.id;
           const isSelected = selectedHotspot === hotspot.id;
+          const hasSymbol = !!hotspot.symbolId;
+          
+          // Enhanced visual feedback when showSymbolStatus is true
+          const strokeColor = isBeingDragged
+            ? 'transparent'
+            : isSelected
+            ? 'rgb(59, 130, 246)' // blue for selected
+            : showSymbolStatus
+            ? (hasSymbol ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)') // green if has symbol, red if not
+            : (hasSymbol ? 'rgb(34, 197, 94)' : 'rgb(156, 163, 175)'); // normal colors
+            
+          const fillOpacity = isBeingDragged
+            ? 0
+            : isSelected
+            ? 0.3
+            : isHovered
+            ? 0.2
+            : showSymbolStatus && !hasSymbol
+            ? 0.15 // slightly more visible for missing symbols
+            : 0.1;
           
           return (
             <rect
               key={hotspot.id}
               id={hotspot.id}
               data-testid="hotspot-rect"
+              data-hotspot-id={hotspot.id}
               data-symbol={hotspot.symbolId || ''}
+              className={`hotspot-rectangle ${hasSymbol ? 'hotspot-has-symbol' : 'hotspot-no-symbol'} ${isSelected ? 'hotspot-selected' : ''} ${!isPreviewMode && isHovered ? 'cursor-move' : 'cursor-pointer'} transition-opacity`}
               x={`${hotspot.x1 * 100}%`}
               y={`${hotspot.y1 * 100}%`}
               width={`${(hotspot.x2 - hotspot.x1) * 100}%`}
               height={`${(hotspot.y2 - hotspot.y1) * 100}%`}
-              fill={
-                isBeingDragged
-                  ? 'transparent'
-                  : isSelected
-                  ? 'rgba(59, 130, 246, 0.3)'
-                  : isHovered
-                  ? 'rgba(59, 130, 246, 0.2)'
-                  : 'rgba(59, 130, 246, 0.1)'
-              }
-              stroke={
-                isBeingDragged
-                  ? 'transparent'
-                  : isSelected
-                  ? 'rgb(59, 130, 246)'
-                  : hotspot.symbolId
-                  ? 'rgb(34, 197, 94)'
-                  : 'rgb(156, 163, 175)'
-              }
-              strokeWidth={isSelected ? 2 : 1}
-              className={`${isPreviewMode ? 'pointer-events-auto' : 'pointer-events-auto'} ${!isPreviewMode && isHovered ? 'cursor-move' : 'cursor-pointer'} transition-opacity`}
+              fill={strokeColor}
+              fillOpacity={fillOpacity}
+              stroke={strokeColor}
+              strokeWidth={showSymbolStatus && !hasSymbol ? 2 : (isSelected ? 2 : 1)}
+              strokeDasharray={showSymbolStatus && !hasSymbol ? '5,5' : undefined}
               style={{
                 cursor: !isPreviewMode && isHovered ? 'move' : 'pointer',
-                opacity: isBeingDragged ? 0 : 1
+                opacity: isBeingDragged ? 0 : 1,
+                pointerEvents: isPreviewMode || isBeingDragged ? 'auto' : 'auto'
               }}
               onMouseEnter={() => setHoveredHotspot(hotspot.id)}
               onMouseLeave={() => setHoveredHotspot(null)}

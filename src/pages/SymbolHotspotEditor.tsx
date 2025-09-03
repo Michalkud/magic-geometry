@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import HotspotCanvas, { Rectangle } from '@/components/editor/HotspotCanvas';
 import SymbolList from '@/components/editor/SymbolList';
+import AssignedSymbolsList from '@/components/editor/AssignedSymbolsList';
 import CoordinateDisplay from '@/components/editor/CoordinateDisplay';
 import ExportModal from '@/components/editor/ExportModal';
 import { TAROT_CARDS } from '@/data/cards';
@@ -24,6 +25,8 @@ export default function SymbolHotspotEditor() {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showToast, setShowToast] = useState<string | null>(null);
+  const [showAssignedSymbols, setShowAssignedSymbols] = useState(false);
+  const [filterUnassignedOnly, setFilterUnassignedOnly] = useState(false);
   const [undoState, setUndoState] = useState<UndoState>({
     past: [],
     present: {},
@@ -97,6 +100,14 @@ export default function SymbolHotspotEditor() {
       setCurrentCoords(null);
     }
   }, [currentHotspots]);
+  
+  // Handle removing symbol from hotspot
+  const handleRemoveSymbol = useCallback((hotspotId: string) => {
+    const updatedHotspots = currentHotspots.map(h => 
+      h.id === hotspotId ? { ...h, symbolId: undefined } : h
+    );
+    handleHotspotsChange(updatedHotspots);
+  }, [currentHotspots, handleHotspotsChange]);
 
   // Save to localStorage
   const handleSave = useCallback(() => {
@@ -197,6 +208,18 @@ export default function SymbolHotspotEditor() {
               </button>
               
               <button
+                data-testid="toggle-assigned-symbols"
+                onClick={() => setShowAssignedSymbols(!showAssignedSymbols)}
+                className={`px-4 py-2 rounded font-medium transition-colors ${
+                  showAssignedSymbols
+                    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+              >
+                {showAssignedSymbols ? 'Hide' : 'Show'} Assigned
+              </button>
+              
+              <button
                 onClick={handleSave}
                 className="px-4 py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 transition-colors"
               >
@@ -214,9 +237,9 @@ export default function SymbolHotspotEditor() {
                 onClick={() => {
                   // Add demo hotspots for testing
                   const demoHotspots = [
-                    { id: 'demo-1', x1: 0.35, y1: 0.15, x2: 0.65, y2: 0.35, symbolId: 'the-fool-figure' },
+                    { id: 'demo-1', x1: 0.35, y1: 0.15, x2: 0.65, y2: 0.35, symbolId: 'fool-youth-figure' },
                     { id: 'demo-2', x1: 0.25, y1: 0.65, x2: 0.45, y2: 0.85, symbolId: 'white-dog' },
-                    { id: 'demo-3', x1: 0.55, y1: 0.75, x2: 0.75, y2: 0.95, symbolId: 'cliff-edge' },
+                    { id: 'demo-3', x1: 0.55, y1: 0.75, x2: 0.75, y2: 0.95, symbolId: 'precipice-cliff' },
                   ];
                   handleHotspotsChange(demoHotspots);
                 }}
@@ -229,53 +252,71 @@ export default function SymbolHotspotEditor() {
           </div>
         </div>
         
-        {/* Canvas area */}
-        <div className="flex-1 flex overflow-hidden">
-          <div className="flex-1 p-8 overflow-auto flex items-center justify-center bg-gray-900">
-            {currentCard && (
-              <HotspotCanvas
-                imageSrc={currentCard.image}
-                imageAlt={currentCard.label}
-                hotspots={currentHotspots}
-                selectedHotspot={selectedHotspot}
-                isPreviewMode={isPreviewMode}
-                onHotspotsChange={handleHotspotsChange}
-                onHotspotSelect={handleHotspotSelect}
-                onCoordinateChange={setCurrentCoords}
+        {/* Main content area with canvas */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Canvas area */}
+          <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 p-8 overflow-auto flex items-center justify-center bg-gray-900">
+              {currentCard && (
+                <HotspotCanvas
+                  imageSrc={currentCard.image}
+                  imageAlt={currentCard.label}
+                  hotspots={currentHotspots}
+                  selectedHotspot={selectedHotspot}
+                  isPreviewMode={isPreviewMode}
+                  showSymbolStatus={showAssignedSymbols}
+                  onHotspotsChange={handleHotspotsChange}
+                  onHotspotSelect={handleHotspotSelect}
+                  onCoordinateChange={setCurrentCoords}
+                />
+              )}
+            </div>
+            
+            {/* Coordinate display */}
+            <div className="w-64 p-4 bg-gray-950 border-l border-gray-700">
+              <CoordinateDisplay 
+                coordinates={currentCoords}
+                imageSize={currentCard ? { width: 400, height: 600 } : undefined}
               />
-            )}
-          </div>
-          
-          {/* Coordinate display */}
-          <div className="w-64 p-4 bg-gray-950 border-l border-gray-700">
-            <CoordinateDisplay 
-              coordinates={currentCoords}
-              imageSize={currentCard ? { width: 400, height: 600 } : undefined}
-            />
-            
-            {selectedHotspot && (
-              <div className="mt-4 p-3 bg-gray-800 rounded border border-gray-700">
-                <h3 className="text-sm font-semibold text-white mb-2">Selected Hotspot</h3>
-                <div className="text-xs text-gray-400">
-                  ID: {selectedHotspot}
-                </div>
-                {selectedSymbol && (
-                  <div className="text-xs text-green-400 mt-1">
-                    Symbol: {selectedSymbol}
+              
+              {selectedHotspot && (
+                <div className="mt-4 p-3 bg-gray-800 rounded border border-gray-700">
+                  <h3 className="text-sm font-semibold text-white mb-2">Selected Hotspot</h3>
+                  <div className="text-xs text-gray-400">
+                    ID: {selectedHotspot}
                   </div>
-                )}
-              </div>
-            )}
-            
-            <div className="mt-4 p-3 bg-gray-800 rounded border border-gray-700">
-              <h3 className="text-sm font-semibold text-white mb-2">Statistics</h3>
-              <div className="space-y-1 text-xs text-gray-400">
-                <div>Total hotspots: {currentHotspots.length}</div>
-                <div>With symbols: {currentHotspots.filter(h => h.symbolId).length}</div>
-                <div>Without symbols: {currentHotspots.filter(h => !h.symbolId).length}</div>
+                  {selectedSymbol && (
+                    <div className="text-xs text-green-400 mt-1">
+                      Symbol: {selectedSymbol}
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              <div className="mt-4 p-3 bg-gray-800 rounded border border-gray-700">
+                <h3 className="text-sm font-semibold text-white mb-2">Statistics</h3>
+                <div className="space-y-1 text-xs text-gray-400">
+                  <div>Total hotspots: {currentHotspots.length}</div>
+                  <div>With symbols: {currentHotspots.filter(h => h.symbolId).length}</div>
+                  <div>Without symbols: {currentHotspots.filter(h => !h.symbolId).length}</div>
+                </div>
               </div>
             </div>
           </div>
+          
+          {/* Assigned Symbols Panel */}
+          {showAssignedSymbols && (
+            <div className="h-64 border-t border-gray-700">
+              <AssignedSymbolsList
+                hotspots={currentHotspots}
+                selectedHotspot={selectedHotspot}
+                onSelectHotspot={handleHotspotSelect}
+                onRemoveSymbol={handleRemoveSymbol}
+                showUnassignedFilter={filterUnassignedOnly}
+                onToggleUnassignedFilter={() => setFilterUnassignedOnly(!filterUnassignedOnly)}
+              />
+            </div>
+          )}
         </div>
       </div>
       
@@ -284,6 +325,8 @@ export default function SymbolHotspotEditor() {
         <SymbolList
           selectedSymbol={selectedSymbol}
           onSymbolSelect={handleSymbolSelect}
+          hideAssignedSymbols={filterUnassignedOnly}
+          assignedSymbolIds={currentHotspots.filter(h => h.symbolId).map(h => h.symbolId!)}
         />
       </div>
       

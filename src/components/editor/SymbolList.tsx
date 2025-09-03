@@ -5,9 +5,16 @@ import { Symbol } from '@/data/symbols/types';
 export interface SymbolListProps {
   selectedSymbol?: string | null;
   onSymbolSelect: (symbolId: string) => void;
+  hideAssignedSymbols?: boolean;
+  assignedSymbolIds?: string[];
 }
 
-export default function SymbolList({ selectedSymbol, onSymbolSelect }: SymbolListProps) {
+export default function SymbolList({ 
+  selectedSymbol, 
+  onSymbolSelect,
+  hideAssignedSymbols = false,
+  assignedSymbolIds = []
+}: SymbolListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterCard, setFilterCard] = useState<string>('all');
@@ -26,9 +33,12 @@ export default function SymbolList({ selectedSymbol, onSymbolSelect }: SymbolLis
       const matchesCard = filterCard === 'all' || 
         symbol.appearances.some(appearance => appearance.cardId === filterCard);
       
-      return matchesSearch && matchesType && matchesCard;
+      const isAssigned = assignedSymbolIds.includes(symbol.id);
+      const matchesAssignedFilter = !hideAssignedSymbols || !isAssigned;
+      
+      return matchesSearch && matchesType && matchesCard && matchesAssignedFilter;
     });
-  }, [symbols, searchTerm, filterType, filterCard]);
+  }, [symbols, searchTerm, filterType, filterCard, hideAssignedSymbols, assignedSymbolIds]);
   
   const symbolTypes = useMemo(() => {
     const types = new Set(symbols.map(s => s.type));
