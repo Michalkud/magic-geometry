@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import TreeOfLifeMystical from './components/TreeOfLifeMystical';
-import SymbolQuizPage from './pages/SymbolQuizPage';
+import VisualPatternGame from './pages/VisualPatternGame';
 import SymbolSystemDemo from './pages/SymbolSystemDemo';
 import SymbolHotspotEditor from './pages/SymbolHotspotEditor';
 import SymbolAssociationPage from './pages/SymbolAssociationPage';
 import DatabaseDemo from './pages/DatabaseDemo';
 import DatabaseSchemaPage from './pages/DatabaseSchemaPage';
+import CardRelationshipsPage from './pages/CardRelationshipsPage';
 import { initializeDatabase } from './db/db';
 
 export default function App() {
@@ -53,12 +54,14 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<TreeOfLifeMystical />}></Route>
-        <Route path="/quiz" element={<SymbolQuizPage />}></Route>
+        <Route path="/pattern-game" element={<VisualPatternGame />}></Route>
         <Route path="/symbols" element={<SymbolSystemDemo />}></Route>
         <Route path="/editor" element={<SymbolHotspotEditor />}></Route>
         <Route path="/association" element={<SymbolAssociationPage />}></Route>
         <Route path="/database" element={<DatabaseDemo />}></Route>
         <Route path="/schema" element={<DatabaseSchemaPage />}></Route>
+        <Route path="/relationships" element={<CardRelationshipsPage />}></Route>
+        <Route path="*" element={<div><h1>404 Not Found</h1><p>Current path: {window.location.pathname}</p></div>}></Route>
       </Routes>
     </BrowserRouter>
   );

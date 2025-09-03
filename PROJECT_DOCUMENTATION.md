@@ -10,12 +10,13 @@ Magic Geometry is an interactive web application for exploring Tarot symbolism t
 - **Database**: Dexie.js for client-side IndexedDB storage with comprehensive data seeding
 - **Routes**:
   - `/` - Interactive Tree of Life with 22 Major Arcana paths
-  - `/quiz` - Symbol memory quiz with 150+ symbols from RWS/Thoth/Universal sources
+  - `/pattern-game` - Visual Pattern Matching Game (visual-only symbol recognition)
   - `/symbols` - Symbol Graph System demo page
   - `/editor` - Symbol Hotspot Editor for card annotation
   - `/association` - Symbol Association with arrow drawing and radius mapping
   - `/database` - Database management demo page
   - `/schema` - Database schema visualization
+  - `/relationships` - Interactive Card Relationships visualization with Sacred Geometry layouts
 
 ### Database Structure (COMPLETE ✅)
 The application uses IndexedDB via Dexie with the following tables:
@@ -40,11 +41,13 @@ All data is automatically seeded from `/src/data/` files on first load.
 - Hover effects showing floating card previews
 - Dual display modes (line paths vs individual cards)
 
-### 2. Symbol Quiz System (`/quiz`)
-- Memory quiz with 150+ symbols from multiple sources
-- Progress tracking with LocalStorage
-- Gamification features (streaks and achievements)
-- Multi-source symbols (RWS, Thoth, Universal)
+### 2. Visual Pattern Matching Game (`/pattern-game`) - NEW ✅
+- Visual-only symbol recognition game (no text labels during gameplay)
+- Progressive difficulty levels (Easy, Medium, Hard)
+- Timed challenges with visual feedback
+- Streak tracking with visual rewards
+- Particle effects and animations for correct matches
+- Designed for neurodivergent learners following visual learning principles
 
 ### 3. Symbol Graph System (`/symbols`) - COMPLETE ✅
 
@@ -544,6 +547,127 @@ Visual representation of the database structure showing all 11 tables, their fie
 - Comprehensive E2E test suite: `/tests/e2e/database-schema.spec.ts`
 - Tests cover visual diagram, hover effects, click navigation, and all existing features
 
+### 7. Card Relationships Page (`/relationships`)
+**Added: 2025-09-03**
+**Fixed: 2025-09-03** - Resolved 3D view THREE.js import issue
+
+#### Purpose
+Interactive network visualization showing philosophical connections between tarot cards through elemental, astrological, numerical, Tree of Life path, and sephirotic relationships. Designed as an educational tool to help users understand tarot philosophy through visual connections rather than individual card meanings.
+
+#### Components
+
+##### CardRelationshipsPage (`/src/pages/CardRelationshipsPage.tsx`)
+- Main component using react-cytoscapejs for network visualization
+- Interactive force-directed graph layout with 78 tarot cards + 10 Sephirot nodes
+- Multiple relationship type filters with educational descriptions
+- **Sacred Geometry Layout Options**: 6 layout types including Tree of Life, Metatron's Cube, Flower of Life
+- Node selection showing detailed card information
+- Legend panel explaining node types and elemental colors
+- Reset layout functionality for graph re-arrangement
+
+##### Relationship Data System (`/src/data/cardRelationships.ts`)
+- **CardNode type**: Represents cards and Sephirot as graph nodes
+- **CardRelationship type**: Defines connections between nodes
+- **generateCardNodes()**: Creates 100+ nodes (22 Major + 40 Minor + 10 Sephirot)
+- **generateCardRelationships()**: Creates 200+ relationships across 5 types
+- **EDUCATIONAL_DESCRIPTIONS**: Explains each relationship type's significance
+
+##### Sacred Geometry Layout System (`/src/utils/sacredGeometryLayouts.ts`)
+- **getLayoutPositions()**: Calculates node positions based on sacred geometry patterns
+- **getLayoutConfig()**: Returns Cytoscape layout configuration for each geometry type
+- **Layout Types**: 
+  - **Dynamic**: Force-directed layout (default)
+  - **Tree of Life**: Traditional Kabbalistic positions with sephirot alignment
+  - **Metatron's Cube**: 13-point Fruit of Life pattern formation
+  - **Flower of Life**: 19 overlapping circles sacred geometry
+  - **Circle**: Simple circular arrangement for equal distribution
+  - **Hexagram**: Star of David formation with inner and outer points
+- **Auto-scaling**: Positions automatically scale to fit viewport dimensions
+- **Preset Layout Integration**: Uses Cytoscape's preset layout with calculated coordinates
+
+#### Features
+- **Interactive Network Graph**: Force-directed layout with draggable nodes
+- **Sacred Geometry Layouts**: 6 layout options for node positioning:
+  - **Dynamic**: Force-directed layout with physics simulation
+  - **Tree of Life**: Traditional Kabbalistic positions aligning sephirot to sacred coordinates
+  - **Metatron's Cube**: 13-point Fruit of Life pattern with nested geometric positioning
+  - **Flower of Life**: 19 overlapping circles following sacred geometry principles
+  - **Circle**: Equal distribution around a circle for balanced viewing
+  - **Hexagram**: Star of David formation with dual-triangle positioning
+- **Relationship Type Filtering**: Toggle 5 different connection types:
+  - **Path**: Major Arcana connecting Sephirot via Tree of Life paths
+  - **Sephirotic**: Minor Arcana manifesting Sephirot energies (Ace=Kether, 10=Malkuth)
+  - **Elemental**: Cards sharing Fire/Water/Air/Earth correspondences
+  - **Numerical**: Sequential progression through Major Arcana (Fool's Journey)
+  - **Astrological**: Planetary and zodiacal influences (future implementation)
+- **Color Coding**: Visual distinction by elements and relationship types
+- **Educational Tooltips**: Descriptions explaining philosophical significance
+- **Node Details Panel**: Shows card correspondences, Hebrew letters, elements
+- **Dynamic Legend**: Node types, elemental associations, and relationship colors
+- **Responsive Layout**: Auto-adjusting graph with collision detection
+
+#### Educational Framework
+Based on research of tarot philosophy and traditional correspondences:
+
+1. **Elemental Theory**: Four classical elements connecting related cards
+2. **Tree of Life Mapping**: Major Arcana as paths, Minor Arcana as emanations
+3. **Astrological Correspondences**: Golden Dawn attributions for deeper meaning
+4. **Numerical Progression**: Spiritual journey from Fool (0) to World (21)
+5. **Hebrew Letter Sequence**: Aleph through Tav representing cosmic principles
+
+#### Data Structure
+
+```typescript
+type CardNode = {
+  id: string;
+  label: string;
+  type: 'major' | 'minor' | 'sephirah';
+  data: any; // Original card or sephirah data
+  color: string; // Element-based coloring
+  size: number; // Visual prominence
+};
+
+type CardRelationship = {
+  id: string;
+  source: string;
+  target: string;
+  type: RelationshipType;
+  strength: number; // 1-10 for visual weight
+  description: string; // Educational explanation
+  color: string; // Relationship type color
+};
+```
+
+#### Technical Implementation
+- **react-cytoscapejs**: Network visualization with WebGL rendering
+- **Cytoscape.js**: Graph theory library with advanced layouts
+- **Force-directed Layout**: Organic positioning based on connections
+- **Real-time Filtering**: Dynamic graph updates without full re-render
+- **Performance Optimization**: Efficient handling of 200+ relationships
+- **TypeScript**: Full type safety for graph elements and callbacks
+- **3D Visualization**: THREE.js integration for 3D force graph rendering with proper ESM imports
+- **Dual Engine Support**: Toggle between 2D/3D force graph and Cytoscape visualization
+
+#### Usage Workflow
+1. **Load Page**: Default shows Tree of Life path connections
+2. **Add Relationship Types**: Toggle elemental, numerical, or sephirotic connections  
+3. **Explore Connections**: Hover and click nodes to see details
+4. **Educational Learning**: Read descriptions explaining each relationship type
+5. **Visual Analysis**: Observe clustering and connection patterns
+6. **Reset Layout**: Re-arrange graph for better visualization
+
+#### Educational Value
+- **Pattern Recognition**: Visual clusters show related card groups
+- **Philosophical Understanding**: See how ancient wisdom systems connect
+- **Comparative Analysis**: Multiple filtering shows different perspectives
+- **Memory Aid**: Visual associations help remember card meanings
+- **System Thinking**: Understand tarot as interconnected wisdom tradition
+
+#### Testing
+- Comprehensive E2E test suite: `/tests/e2e/card-relationships.spec.ts`
+- Tests relationship filtering, node interactions, legend display, and educational content
+- Validates network visualization loads and responds to user interactions
+
 ## Roadmap
 
 ### Implemented ✅
@@ -554,6 +678,7 @@ Visual representation of the database structure showing all 11 tables, their fie
 - Symbol Association Page with arrow drawing
 - Database migration to IndexedDB (Dexie)
 - Database Schema Visualization
+- Card Relationships Network Visualization
 
 ### Not Yet Implemented
 - `/cards` - Card library page
