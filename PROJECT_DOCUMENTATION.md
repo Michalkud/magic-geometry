@@ -68,7 +68,8 @@ type SymbolRelationship = {
   - Cross-card symbol tracking
 
 ### 4. Symbol Hotspot Editor (`/editor`)
-**Added: 2025-09-02**
+**Added: 2025-09-02**  
+**Updated: 2025-09-03** - Added smooth rectangle movement capability
 
 Interactive tool for defining precise symbol locations on tarot cards using rectangular regions.
 
@@ -80,12 +81,21 @@ Enables users to annotate tarot card images by drawing rectangles around symbols
 ##### HotspotCanvas (`/src/components/editor/HotspotCanvas.tsx`)
 - Interactive canvas for drawing rectangles on card images
 - Click and drag to create new hotspots
+- Click and drag existing rectangles to move them (cursor changes to move icon)
+- **Smooth rectangle movement implementation**:
+  - Uses separate drag preview state for visual feedback
+  - Original rectangle becomes transparent during drag
+  - Preview rectangle follows cursor with dashed outline and drop shadow
+  - Position updates only on mouse release (reduces re-renders)
+  - Maintains boundaries within canvas (0-1 normalized coordinates)
 - Visual feedback during drawing (dashed blue rectangle)
-- Hover effects on existing hotspots
+- Visual feedback during move (dashed outline with drop shadow)
+- Hover effects on existing hotspots (cursor changes to move icon)
 - Left-click to select hotspots
 - Right-click to delete with confirmation
 - Normalized coordinates (0-1 range) for responsive scaling
 - Preview mode for testing interactions
+- Movement preserves symbol associations
 
 ##### SymbolList (`/src/components/editor/SymbolList.tsx`)
 - Browse all 454 symbols from the symbol registry
@@ -145,10 +155,11 @@ interface RectangleHotspot {
 
 1. **Select Card**: Choose a tarot card from the dropdown
 2. **Draw Rectangles**: Click and drag on the card image to create hotspots
-3. **Select Hotspot**: Click on a rectangle to select it (turns blue)
-4. **Assign Symbol**: Click a symbol from the right panel to associate it
-5. **Save Work**: Click Save to persist to browser storage
-6. **Export Data**: Click Export to get JSON for integration with other features
+3. **Move Rectangles**: Click and drag existing rectangles to reposition them
+4. **Select Hotspot**: Click on a rectangle to select it (turns blue)
+5. **Assign Symbol**: Click a symbol from the right panel to associate it
+6. **Save Work**: Click Save to persist to browser storage
+7. **Export Data**: Click Export to get JSON for integration with other features
 
 #### Export Format
 
@@ -172,14 +183,25 @@ interface RectangleHotspot {
 
 #### Testing
 - Comprehensive E2E test suite (`/tests/e2e/symbol-hotspot-editor.spec.ts`)
-- 9 passing tests covering all major functionality
-- Tests drawing, selection, deletion, export, and persistence
+- 10 passing tests covering all major functionality
+- Tests drawing, selection, deletion, moving, export, and persistence
 
 #### Future Use Cases
 - **Zoom Views**: Use rectangle coordinates to create detailed views of specific symbols
 - **Symbol Learning**: Interactive exploration of card symbolism
 - **Comparative Analysis**: Compare symbol placement across different cards
 - **API Integration**: Export data for use in other tarot applications
+
+#### Technical Implementation Details
+
+##### Smooth Rectangle Movement (2025-09-03)
+The rectangle movement feature uses a dual-state approach for optimal performance:
+- **Drag Preview State**: Temporary visual representation that follows cursor in real-time
+- **Deferred Updates**: Actual hotspot data updates only on mouse release
+- **Performance Optimization**: Reduces React re-renders during drag operations
+- **Visual Feedback**: Original rectangle becomes transparent, preview shows with dashed border and drop shadow
+- **Boundary Constraints**: Rectangles automatically constrain to canvas bounds (0-1 range)
+- **State Management**: Uses `dragPreview` state separate from actual hotspots array
 
 ## Technical Stack
 

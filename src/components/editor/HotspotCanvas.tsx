@@ -37,6 +37,10 @@ export default function HotspotCanvas({
   const [drawEnd, setDrawEnd] = useState({ x: 0, y: 0 });
   const [hoveredHotspot, setHoveredHotspot] = useState<string | null>(null);
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
+  const [isDraggingHotspot, setIsDraggingHotspot] = useState(false);
+  const [draggingHotspotId, setDraggingHotspotId] = useState<string | null>(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [dragPreview, setDragPreview] = useState<Rectangle | null>(null);
 
   useEffect(() => {
     const handleImageLoad = () => {
@@ -72,7 +76,26 @@ export default function HotspotCanvas({
     // Check if clicking on an existing hotspot
     const target = e.target as SVGElement;
     if (target.tagName === 'rect' && target.dataset.testid === 'hotspot-rect') {
-      return; // Don't start drawing if clicking on existing hotspot
+      // Start dragging the hotspot - get ID directly from the element
+      const hotspotId = target.id;
+      
+      if (hotspotId) {
+        const coords = getRelativeCoordinates(e);
+        const hotspot = hotspots.find(h => h.id === hotspotId);
+        if (hotspot) {
+          setIsDraggingHotspot(true);
+          setDraggingHotspotId(hotspotId);
+          // Calculate offset from mouse position to rectangle top-left corner
+          setDragOffset({
+            x: coords.x - hotspot.x1,
+            y: coords.y - hotspot.y1
+          });
+          // Initialize drag preview with current position
+          setDragPreview({ ...hotspot });
+          onHotspotSelect(hotspotId);
+        }
+      }
+      return;
     }
     
     const coords = getRelativeCoordinates(e);
@@ -80,26 +103,97 @@ export default function HotspotCanvas({
     setDrawStart(coords);
     setDrawEnd(coords);
     onHotspotSelect(null);
-  }, [isPreviewMode, getRelativeCoordinates, onHotspotSelect]);
+  }, [isPreviewMode, getRelativeCoordinates, onHotspotSelect, hotspots]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isDrawing || isPreviewMode) return;
+    if (isPreviewMode) return;
     
     const coords = getRelativeCoordinates(e);
-    setDrawEnd(coords);
     
-    if (onCoordinateChange) {
-      onCoordinateChange({
-        x1: Math.min(drawStart.x, coords.x),
-        y1: Math.min(drawStart.y, coords.y),
-        x2: Math.max(drawStart.x, coords.x),
-        y2: Math.max(drawStart.y, coords.y),
-      });
+    // Handle hotspot dragging
+    if (isDraggingHotspot && draggingHotspotId) {
+      const hotspot = hotspots.find(h => h.id === draggingHotspotId);
+      if (hotspot) {
+        const width = hotspot.x2 - hotspot.x1;
+        const height = hotspot.y2 - hotspot.y1;
+        
+        // Calculate new position with offset
+        let newX1 = coords.x - dragOffset.x;
+        let newY1 = coords.y - dragOffset.y;
+        let newX2 = newX1 + width;
+        let newY2 = newY1 + height;
+        
+        // Constrain to canvas bounds
+        if (newX1 < 0) {
+          newX1 = 0;
+          newX2 = width;
+        }
+        if (newY1 < 0) {
+          newY1 = 0;
+          newY2 = height;
+        }
+        if (newX2 > 1) {
+          newX2 = 1;
+          newX1 = 1 - width;
+        }
+        if (newY2 > 1) {
+          newY2 = 1;
+          newY1 = 1 - height;
+        }
+        
+        // Update preview position only (for smooth visual feedback)
+        setDragPreview({
+          ...hotspot,
+          x1: newX1,
+          y1: newY1,
+          x2: newX2,
+          y2: newY2
+        });
+        
+        if (onCoordinateChange) {
+          onCoordinateChange({ x1: newX1, y1: newY1, x2: newX2, y2: newY2 });
+        }
+      }
+      return;
     }
-  }, [isDrawing, isPreviewMode, drawStart, getRelativeCoordinates, onCoordinateChange]);
+    
+    // Handle drawing new rectangle
+    if (isDrawing) {
+      setDrawEnd(coords);
+      
+      if (onCoordinateChange) {
+        onCoordinateChange({
+          x1: Math.min(drawStart.x, coords.x),
+          y1: Math.min(drawStart.y, coords.y),
+          x2: Math.max(drawStart.x, coords.x),
+          y2: Math.max(drawStart.y, coords.y),
+        });
+      }
+    }
+  }, [isDrawing, isDraggingHotspot, draggingHotspotId, isPreviewMode, drawStart, dragOffset, dragPreview, hotspots, getRelativeCoordinates, onCoordinateChange, onHotspotsChange]);
 
   const handleMouseUp = useCallback(() => {
-    if (!isDrawing || isPreviewMode) return;
+    if (isPreviewMode) return;
+    
+    // Handle end of hotspot dragging
+    if (isDraggingHotspot && dragPreview) {
+      // Apply the final position from the preview
+      const updatedHotspots = hotspots.map(h => 
+        h.id === draggingHotspotId 
+          ? { ...h, x1: dragPreview.x1, y1: dragPreview.y1, x2: dragPreview.x2, y2: dragPreview.y2 }
+          : h
+      );
+      onHotspotsChange(updatedHotspots);
+      
+      setIsDraggingHotspot(false);
+      setDraggingHotspotId(null);
+      setDragOffset({ x: 0, y: 0 });
+      setDragPreview(null);
+      return;
+    }
+    
+    // Handle end of drawing
+    if (!isDrawing) return;
     
     const minSize = 0.02; // Minimum 2% of image size
     const width = Math.abs(drawEnd.x - drawStart.x);
@@ -122,7 +216,7 @@ export default function HotspotCanvas({
     if (onCoordinateChange) {
       onCoordinateChange(null);
     }
-  }, [isDrawing, isPreviewMode, drawStart, drawEnd, hotspots, onHotspotsChange, onHotspotSelect, onCoordinateChange]);
+  }, [isDrawing, isDraggingHotspot, draggingHotspotId, dragPreview, isPreviewMode, drawStart, drawEnd, hotspots, onHotspotsChange, onHotspotSelect, onCoordinateChange]);
 
   const handleCanvasContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -160,51 +254,86 @@ export default function HotspotCanvas({
         style={{ width: '100%', height: '100%' }}
       >
         {/* Existing hotspots */}
-        {hotspots.map(hotspot => (
+        {hotspots.map(hotspot => {
+          const isBeingDragged = draggingHotspotId === hotspot.id;
+          const isHovered = hoveredHotspot === hotspot.id;
+          const isSelected = selectedHotspot === hotspot.id;
+          
+          return (
+            <rect
+              key={hotspot.id}
+              id={hotspot.id}
+              data-testid="hotspot-rect"
+              data-symbol={hotspot.symbolId || ''}
+              x={`${hotspot.x1 * 100}%`}
+              y={`${hotspot.y1 * 100}%`}
+              width={`${(hotspot.x2 - hotspot.x1) * 100}%`}
+              height={`${(hotspot.y2 - hotspot.y1) * 100}%`}
+              fill={
+                isBeingDragged
+                  ? 'transparent'
+                  : isSelected
+                  ? 'rgba(59, 130, 246, 0.3)'
+                  : isHovered
+                  ? 'rgba(59, 130, 246, 0.2)'
+                  : 'rgba(59, 130, 246, 0.1)'
+              }
+              stroke={
+                isBeingDragged
+                  ? 'transparent'
+                  : isSelected
+                  ? 'rgb(59, 130, 246)'
+                  : hotspot.symbolId
+                  ? 'rgb(34, 197, 94)'
+                  : 'rgb(156, 163, 175)'
+              }
+              strokeWidth={isSelected ? 2 : 1}
+              className={`${isPreviewMode ? 'pointer-events-auto' : 'pointer-events-auto'} ${!isPreviewMode && isHovered ? 'cursor-move' : 'cursor-pointer'} transition-opacity`}
+              style={{
+                cursor: !isPreviewMode && isHovered ? 'move' : 'pointer',
+                opacity: isBeingDragged ? 0 : 1
+              }}
+              onMouseEnter={() => setHoveredHotspot(hotspot.id)}
+              onMouseLeave={() => setHoveredHotspot(null)}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                if (!isPreviewMode) {
+                  onHotspotSelect(hotspot.id);
+                }
+              }}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const confirmDelete = window.confirm('Delete this hotspot?');
+                if (confirmDelete) {
+                  onHotspotsChange(hotspots.filter(h => h.id !== hotspot.id));
+                  onHotspotSelect(null);
+                }
+              }}
+            />
+          );
+        })}
+        
+        {/* Dragging preview rectangle */}
+        {dragPreview && (
           <rect
-            key={hotspot.id}
-            data-testid="hotspot-rect"
-            data-symbol={hotspot.symbolId || ''}
-            x={`${hotspot.x1 * 100}%`}
-            y={`${hotspot.y1 * 100}%`}
-            width={`${(hotspot.x2 - hotspot.x1) * 100}%`}
-            height={`${(hotspot.y2 - hotspot.y1) * 100}%`}
-            fill={
-              selectedHotspot === hotspot.id
-                ? 'rgba(59, 130, 246, 0.3)'
-                : hoveredHotspot === hotspot.id
-                ? 'rgba(59, 130, 246, 0.2)'
-                : 'rgba(59, 130, 246, 0.1)'
-            }
-            stroke={
-              selectedHotspot === hotspot.id
-                ? 'rgb(59, 130, 246)'
-                : hotspot.symbolId
-                ? 'rgb(34, 197, 94)'
-                : 'rgb(156, 163, 175)'
-            }
-            strokeWidth={selectedHotspot === hotspot.id ? 2 : 1}
-            className={`${isPreviewMode ? 'pointer-events-auto' : 'pointer-events-auto'} cursor-pointer transition-all`}
-            onMouseEnter={() => setHoveredHotspot(hotspot.id)}
-            onMouseLeave={() => setHoveredHotspot(null)}
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              if (!isPreviewMode) {
-                onHotspotSelect(hotspot.id);
-              }
-            }}
-            onContextMenu={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              const confirmDelete = window.confirm('Delete this hotspot?');
-              if (confirmDelete) {
-                onHotspotsChange(hotspots.filter(h => h.id !== hotspot.id));
-                onHotspotSelect(null);
-              }
+            data-testid="drag-preview"
+            data-symbol={dragPreview.symbolId || ''}
+            x={`${dragPreview.x1 * 100}%`}
+            y={`${dragPreview.y1 * 100}%`}
+            width={`${(dragPreview.x2 - dragPreview.x1) * 100}%`}
+            height={`${(dragPreview.y2 - dragPreview.y1) * 100}%`}
+            fill="rgba(59, 130, 246, 0.4)"
+            stroke="rgb(37, 99, 235)"
+            strokeWidth="2"
+            strokeDasharray="5,3"
+            className="pointer-events-none"
+            style={{
+              filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))'
             }}
           />
-        ))}
+        )}
         
         {/* Drawing rectangle */}
         {isDrawing && !isPreviewMode && (

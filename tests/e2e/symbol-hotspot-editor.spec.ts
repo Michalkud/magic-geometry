@@ -196,6 +196,52 @@ test.describe('Symbol Hotspot Editor', () => {
     await expect(page.locator('[data-testid="hotspot-rect"]')).toHaveCount(1);
   });
 
+  test('should move existing rectangles by dragging', async ({ page }) => {
+    const canvas = page.locator('[data-testid="hotspot-canvas"]');
+    
+    // Draw a rectangle using the same approach as working test
+    await canvas.hover();
+    await page.mouse.down();
+    await page.mouse.move(200, 200, { steps: 10 });
+    await page.mouse.up();
+    
+    // Verify hotspot exists
+    await expect(page.locator('[data-testid="hotspot-rect"]')).toHaveCount(1);
+    
+    // Associate a symbol with it
+    await page.locator('input[placeholder="Search symbols..."]').fill('white dog');
+    await page.waitForTimeout(500);
+    const symbolButton = page.locator('button').filter({ hasText: 'White Dog' }).first();
+    await symbolButton.click();
+    
+    // Verify symbol association
+    await expect(page.locator('[data-testid="hotspot-rect"]')).toHaveAttribute('data-symbol', /white-dog/i);
+    
+    // Get initial position
+    const rect = page.locator('[data-testid="hotspot-rect"]').first();
+    const initialX = await rect.getAttribute('x');
+    const initialY = await rect.getAttribute('y');
+    
+    // Move the rectangle by dragging it
+    await rect.hover();
+    await page.mouse.down();
+    await page.mouse.move(350, 350, { steps: 10 });
+    await page.mouse.up();
+    
+    // Verify rectangle moved
+    const newX = await rect.getAttribute('x');
+    const newY = await rect.getAttribute('y');
+    
+    expect(newX).not.toBe(initialX);
+    expect(newY).not.toBe(initialY);
+    
+    // Verify symbol association is preserved
+    await expect(page.locator('[data-testid="hotspot-rect"]')).toHaveAttribute('data-symbol', /white-dog/i);
+    
+    // Verify only one rectangle exists (no duplicate created)
+    await expect(page.locator('[data-testid="hotspot-rect"]')).toHaveCount(1);
+  });
+
   test.skip('should support keyboard shortcuts', async ({ page }) => {
     // Skip for now - keyboard shortcuts implementation can be added later
     const canvas = page.locator('[data-testid="hotspot-canvas"]');
