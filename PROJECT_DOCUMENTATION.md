@@ -6,13 +6,15 @@ Magic Geometry is an interactive web application for exploring Tarot symbolism t
 ## Current Implementation State
 
 ### Core Application
-- **Stack**: React 18 + TypeScript + Vite + Tailwind CSS
+- **Stack**: React 18 + TypeScript + Vite + Tailwind CSS + Dexie (IndexedDB)
+- **Database**: Dexie.js for client-side IndexedDB storage
 - **Routes**:
   - `/` - Interactive Tree of Life with 22 Major Arcana paths
   - `/quiz` - Symbol memory quiz with 150+ symbols from RWS/Thoth/Universal sources
   - `/symbols` - Symbol Graph System demo page
   - `/editor` - Symbol Hotspot Editor for card annotation
   - `/association` - Symbol Association with arrow drawing and radius mapping
+  - `/database` - Database management demo page
 
 ## Core Features
 
@@ -70,7 +72,7 @@ type SymbolRelationship = {
 
 ### 4. Symbol Association Page (`/association`)
 **Added: 2025-09-03**
-**Updated: 2025-09-03** - Fixed z-index issues, added custom delete confirmation, improved test compatibility
+**Updated: 2025-09-03** - Fixed z-index issues, added custom delete confirmation, improved test compatibility, fixed modal overlap and improved space utilization
 
 #### Purpose
 Visual symbol association tool that allows drawing arrows from symbol modals to card images. Creates precise mappings with radius-based areas for symbol associations.
@@ -99,8 +101,9 @@ Visual symbol association tool that allows drawing arrows from symbol modals to 
 ##### CircularLayout (`/src/components/association/CircularLayout.tsx`)
 - Arranges symbol modals in circular formation around card
 - Automatic position calculation based on item count
-- Responsive radius adjustment
-- Even distribution of modals
+- Responsive radius adjustment (0.45 multiplier with 250px minimum)
+- Even distribution of modals with 75px buffer for modal width
+- Prevents overlap with card image
 
 ##### SymbolAssociationPage (`/src/pages/SymbolAssociationPage.tsx`)
 - Main page orchestrating all components
@@ -112,6 +115,7 @@ Visual symbol association tool that allows drawing arrows from symbol modals to 
 - Statistics display
 - Custom delete confirmation modal (replaces browser confirm dialog)
 - Proper state management for delete requests
+- Optimized container height (calc(100vh - 200px)) for better space utilization
 
 #### Data Structure
 
@@ -421,6 +425,51 @@ The assigned symbols management feature provides comprehensive symbol tracking:
 - Production build with `npm run build`
 - Static hosting compatible
 
+## Database Architecture (Added 2025-09-03)
+
+### Technology: Dexie.js (IndexedDB wrapper)
+- Client-side database for offline-first functionality
+- Reactive queries with dexie-react-hooks
+- TypeScript support with typed tables
+
+### Database Schema
+
+```typescript
+// Main tables
+cards: id, trumpNumber, hebrewLetter, element, pathA, pathB
+sephirot: id, key
+minorCards: id, suit, rank, nodeId
+symbols: id, type, category, difficulty
+cardAppearances: ++id, symbolId, cardId
+relationships: ++id, sourceId, targetId, type
+cardMeanings: ++id, cardId, title
+symbolDetails: ++id, cardMeaningId
+hotspots: ++id, cardId, symbolId
+geometries: id
+decans: id, position, sign, planet, minorCard
+```
+
+### React Hooks API
+
+```typescript
+// Available hooks in /src/db/hooks.ts
+useCard(cardId) - Get single card
+useCards() - Get all cards
+useCardsByPath(nodeA, nodeB) - Cards by Tree path
+useSephirot() - All sephirot
+useMinorCards(suit?) - Minor arcana cards
+useSymbols(type?) - Symbols by type
+useCardMeaning(cardId) - Card interpretations
+useSearchCards(query) - Search cards
+useSearchSymbols(query) - Search symbols
+```
+
+### Migration from Static Files
+- All data from `/src/data/` now stored in IndexedDB
+- Automatic seeding on first load
+- Database persists across sessions
+- Reset functionality available
+
 ## Roadmap
 
 ### Implemented ✅
@@ -429,6 +478,7 @@ The assigned symbols management feature provides comprehensive symbol tracking:
 - Symbol Quiz System
 - Symbol Hotspot Editor
 - Symbol Association Page with arrow drawing
+- Database migration to IndexedDB (Dexie)
 
 ### Not Yet Implemented
 - `/cards` - Card library page

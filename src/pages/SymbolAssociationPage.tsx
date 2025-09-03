@@ -233,7 +233,7 @@ export default function SymbolAssociationPage() {
         <div 
           ref={containerRef}
           className="bg-white rounded-lg shadow-sm p-4 relative"
-          style={{ height: '80vh' }}
+          style={{ height: 'calc(100vh - 200px)' }}
         >
           {/* Association Canvas */}
           <AssociationCanvas
@@ -253,7 +253,7 @@ export default function SymbolAssociationPage() {
             <CircularLayout
               centerX={containerDimensions.width / 2}
               centerY={containerDimensions.height / 2}
-              radius={Math.min(containerDimensions.width, containerDimensions.height) * 0.35}
+              radius={Math.max(250, Math.min(containerDimensions.width, containerDimensions.height) * 0.45 - 75)}
             >
               {cardSymbols.map(symbol => (
                 <SymbolModal
