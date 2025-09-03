@@ -79,6 +79,7 @@ export default function SymbolModal({
         width: '150px',
         transform: 'translate(-50%, -50%)',
         userSelect: 'none',
+        zIndex: 10,
       }}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}

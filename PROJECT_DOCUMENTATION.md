@@ -70,6 +70,7 @@ type SymbolRelationship = {
 
 ### 4. Symbol Association Page (`/association`)
 **Added: 2025-09-03**
+**Updated: 2025-09-03** - Fixed z-index issues, added custom delete confirmation, improved test compatibility
 
 #### Purpose
 Visual symbol association tool that allows drawing arrows from symbol modals to card images. Creates precise mappings with radius-based areas for symbol associations.
@@ -78,12 +79,14 @@ Visual symbol association tool that allows drawing arrows from symbol modals to 
 
 ##### AssociationCanvas (`/src/components/association/AssociationCanvas.tsx`)
 - Central card image display
-- SVG overlay for arrows and radius circles
+- SVG overlay for arrows and radius circles with proper z-index layering
 - Mouse event handling for association creation
 - Real-time arrow drawing feedback
 - Radius calculation based on arrow length
-- Right-click deletion of associations
+- Right-click deletion with custom confirmation modal support
 - Visual indicators for saved associations
+- Persistent radius value display (shows immediately after creation)
+- Improved pointer-events management for SVG elements
 
 ##### SymbolModal (`/src/components/association/SymbolModal.tsx`)
 - Draggable symbol information cards
@@ -91,6 +94,7 @@ Visual symbol association tool that allows drawing arrows from symbol modals to 
 - Drag initiation point for arrow drawing
 - Visual feedback during drag operations
 - Hover and active states
+- Proper z-index management (z-index: 10) to prevent overlapping with associations
 
 ##### CircularLayout (`/src/components/association/CircularLayout.tsx`)
 - Arranges symbol modals in circular formation around card
@@ -106,6 +110,8 @@ Visual symbol association tool that allows drawing arrows from symbol modals to 
 - LocalStorage persistence
 - JSON export functionality
 - Statistics display
+- Custom delete confirmation modal (replaces browser confirm dialog)
+- Proper state management for delete requests
 
 #### Data Structure
 

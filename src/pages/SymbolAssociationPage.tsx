@@ -31,6 +31,7 @@ export default function SymbolAssociationPage() {
   const [exportData, setExportData] = useState<string>('');
   const [showToast, setShowToast] = useState<string | null>(null);
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   // Load associations from localStorage
   useEffect(() => {
@@ -143,7 +144,13 @@ export default function SymbolAssociationPage() {
     };
     
     setCardAssociations(updated);
+    setPendingDeleteId(null);
   }, [selectedCard, cardAssociations, currentAssociations]);
+
+  // Handle delete request (for custom confirmation)
+  const handleDeleteRequest = useCallback((id: string) => {
+    setPendingDeleteId(id);
+  }, []);
 
   // Save to localStorage
   const handleSave = useCallback(() => {
@@ -237,6 +244,8 @@ export default function SymbolAssociationPage() {
             onAssociationCreate={handleAssociationCreate}
             onAssociationDelete={handleAssociationDelete}
             draggedSymbol={dragState ? { id: dragState.symbolId, name: dragState.symbolName } : null}
+            pendingDeleteId={pendingDeleteId}
+            onDeleteRequest={handleDeleteRequest}
           />
 
           {/* Symbol Modals in Circular Formation */}
@@ -324,8 +333,34 @@ export default function SymbolAssociationPage() {
           </div>
         )}
 
-        {/* Delete Confirmation (handled inline with confirm dialog) */}
-        <div data-testid="confirm-delete" style={{ display: 'none' }}></div>
+        {/* Delete Confirmation Modal */}
+        {pendingDeleteId && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+              <h3 className="text-lg font-semibold mb-4">Confirm Delete</h3>
+              <p className="text-gray-600 mb-6">Delete this association?</p>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => setPendingDeleteId(null)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  data-testid="confirm-delete"
+                  onClick={() => {
+                    if (pendingDeleteId) {
+                      handleAssociationDelete(pendingDeleteId);
+                    }
+                  }}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
