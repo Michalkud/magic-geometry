@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import TreeOfLifeMystical from './components/TreeOfLifeMystical';
-import ThothCardDetailPage from './pages/ThothCardDetailPage';
 import SymbolQuizPage from './pages/SymbolQuizPage';
 import SymbolSystemDemo from './pages/SymbolSystemDemo';
 import SymbolHotspotEditor from './pages/SymbolHotspotEditor';
 import SymbolAssociationPage from './pages/SymbolAssociationPage';
 import DatabaseDemo from './pages/DatabaseDemo';
+import DatabaseSchemaPage from './pages/DatabaseSchemaPage';
 import { initializeDatabase } from './db/db';
 
 export default function App() {
@@ -58,6 +58,7 @@ export default function App() {
         <Route path="/editor" element={<SymbolHotspotEditor />}></Route>
         <Route path="/association" element={<SymbolAssociationPage />}></Route>
         <Route path="/database" element={<DatabaseDemo />}></Route>
+        <Route path="/schema" element={<DatabaseSchemaPage />}></Route>
       </Routes>
     </BrowserRouter>
   );

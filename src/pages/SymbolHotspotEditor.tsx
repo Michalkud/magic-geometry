@@ -4,7 +4,8 @@ import SymbolList from '@/components/editor/SymbolList';
 import AssignedSymbolsList from '@/components/editor/AssignedSymbolsList';
 import CoordinateDisplay from '@/components/editor/CoordinateDisplay';
 import ExportModal from '@/components/editor/ExportModal';
-import { TAROT_CARDS } from '@/data/cards';
+import { useCards } from '@/db/hooks';
+import { initializeDatabase } from '@/db/db';
 
 interface CardHotspots {
   [cardId: string]: Rectangle[];
@@ -17,6 +18,9 @@ interface UndoState {
 }
 
 export default function SymbolHotspotEditor() {
+  // Database hooks
+  const cards = useCards();
+  
   const [selectedCard, setSelectedCard] = useState('the-fool');
   const [hotspots, setHotspots] = useState<CardHotspots>({});
   const [selectedHotspot, setSelectedHotspot] = useState<string | null>(null);
@@ -32,6 +36,11 @@ export default function SymbolHotspotEditor() {
     present: {},
     future: [],
   });
+
+  // Initialize database
+  useEffect(() => {
+    initializeDatabase();
+  }, []);
 
   // Load hotspots from localStorage on mount
   useEffect(() => {
@@ -51,8 +60,20 @@ export default function SymbolHotspotEditor() {
     }
   }, []);
 
+  // Loading state
+  if (!cards) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p>Loading editor...</p>
+        </div>
+      </div>
+    );
+  }
+
   // Get current card data
-  const currentCard = TAROT_CARDS.find(c => c.id === selectedCard);
+  const currentCard = cards.find(c => c.id === selectedCard);
   const currentHotspots = hotspots[selectedCard] || [];
 
   // Handle hotspot changes with undo support
@@ -189,7 +210,7 @@ export default function SymbolHotspotEditor() {
                 }}
                 className="px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
               >
-                {TAROT_CARDS.map(card => (
+                {cards.map(card => (
                   <option key={card.id} value={card.id}>
                     {card.label}
                   </option>

@@ -206,3 +206,136 @@ export function useSearchSymbols(query: string): DBSymbol[] | undefined {
     [query]
   );
 }
+
+// Symbol Registry Hooks
+
+export function useAllSymbols(): DBSymbol[] | undefined {
+  return useLiveQuery(
+    async () => {
+      return await db.symbols.toArray();
+    }
+  );
+}
+
+export function useSymbolsByType(type: string): DBSymbol[] | undefined {
+  return useLiveQuery(
+    async () => {
+      return await db.symbols.where('type').equals(type).toArray();
+    },
+    [type]
+  );
+}
+
+export function useSymbolsByCard(cardId: string): DBSymbol[] | undefined {
+  return useLiveQuery(
+    async () => {
+      // Convert card id format if needed
+      const appearances = await db.cardAppearances.where('cardId').equals(cardId).toArray();
+      const symbolIds = [...new Set(appearances.map(a => a.symbolId))];
+      
+      if (symbolIds.length === 0) return [];
+      
+      const symbols = await db.symbols.where('id').anyOf(symbolIds).toArray();
+      
+      // Add appearance data to each symbol
+      return symbols.map(symbol => ({
+        ...symbol,
+        appearances: appearances.filter(a => a.symbolId === symbol.id)
+      }));
+    },
+    [cardId]
+  );
+}
+
+export function useSymbolRegistry() {
+  return useLiveQuery(
+    async () => {
+      const symbols = await db.symbols.toArray();
+      const appearances = await db.cardAppearances.toArray();
+      
+      // Create a map for quick lookup
+      const registry = new Map();
+      
+      // Build symbol registry with appearances
+      for (const symbol of symbols) {
+        const symbolAppearances = appearances.filter(a => a.symbolId === symbol.id);
+        registry.set(symbol.id, {
+          ...symbol,
+          appearances: symbolAppearances
+        });
+      }
+      
+      return registry;
+    }
+  );
+}
+
+export function useSymbolRelationships(symbolId?: string): DBRelationship[] | undefined {
+  return useLiveQuery(
+    async () => {
+      if (symbolId) {
+        const asSource = await db.relationships.where('sourceId').equals(symbolId).toArray();
+        const asTarget = await db.relationships
+          .where('targetId')
+          .equals(symbolId)
+          .filter(r => r.bidirectional === true)
+          .toArray();
+        
+        return [...asSource, ...asTarget];
+      }
+      return await db.relationships.toArray();
+    },
+    [symbolId]
+  );
+}
+
+export function useQuizSymbols() {
+  return useLiveQuery(
+    async () => {
+      // Get symbols that have appearances in cards (for quiz)
+      const appearances = await db.cardAppearances.toArray();
+      const symbolIds = [...new Set(appearances.map(a => a.symbolId))];
+      
+      const symbols = await db.symbols.where('id').anyOf(symbolIds).toArray();
+      
+      // Add card appearance counts and sources
+      return symbols.map(symbol => {
+        const symbolAppearances = appearances.filter(a => a.symbolId === symbol.id);
+        const uniqueCards = [...new Set(symbolAppearances.map(a => a.cardId))];
+        
+        return {
+          ...symbol,
+          cardCount: uniqueCards.length,
+          sources: symbolAppearances.map(a => a.variant || 'universal')
+        };
+      });
+    }
+  );
+}
+
+export function useSymbolCounts() {
+  return useLiveQuery(
+    async () => {
+      const symbols = await db.symbols.toArray();
+      const appearances = await db.cardAppearances.toArray();
+      
+      const byType = symbols.reduce((acc, symbol) => {
+        acc[symbol.type] = (acc[symbol.type] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      const bySource = appearances.reduce((acc, app) => {
+        const source = app.variant || 'universal';
+        acc[source] = (acc[source] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      return {
+        total: symbols.length,
+        byType,
+        bySource,
+        withAppearances: [...new Set(appearances.map(a => a.symbolId))].length
+      };
+    }
+  );
+}

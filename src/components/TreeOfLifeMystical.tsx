@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TAROT_CARDS } from '../data/cards';
-import { SEPHIROT } from '../data/sephirot';
+import { useCards, useSephirot } from '../db/hooks';
+import { initializeDatabase } from '../db/db';
 
 // Tree of Life coordinates - mathematically positioned
 const SEPHIROTH_POSITIONS: Record<number, { x: number; y: number }> = {
@@ -27,6 +27,27 @@ export default function TreeOfLifeMystical() {
   const navigate = useNavigate();
   const [hoveredPath, setHoveredPath] = useState<string | null>(null);
   const [cardPreview, setCardPreview] = useState<CardPreviewData | null>(null);
+  
+  // Database hooks
+  const cards = useCards();
+  const sephirot = useSephirot();
+  
+  // Initialize database
+  React.useEffect(() => {
+    initializeDatabase();
+  }, []);
+
+  // Loading state
+  if (!cards || !sephirot) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-indigo-900 via-purple-900 to-black text-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Loading Tree of Life...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Handle card click navigation
   const handleCardClick = (card: any) => {
@@ -184,7 +205,7 @@ export default function TreeOfLifeMystical() {
         >
           {/* Define all card image patterns once at the top */}
           <defs>
-            {TAROT_CARDS.map((card) => (
+            {cards.map((card) => (
               <pattern
                 key={card.id}
                 id={`cardPattern-${card.id}`}
@@ -206,15 +227,15 @@ export default function TreeOfLifeMystical() {
           </defs>
 
           {/* Render all paths with card images */}
-          {TAROT_CARDS.map((card) => {
-            if (card.path) {
-              return generatePath(card.path.a, card.path.b, card);
+          {cards.map((card) => {
+            if (card.pathA && card.pathB) {
+              return generatePath(card.pathA, card.pathB, card);
             }
             return null;
           })}
 
           {/* Render Sephiroth circles */}
-          {SEPHIROT.map((sephirah) => {
+          {sephirot.map((sephirah) => {
             const pos = SEPHIROTH_POSITIONS[sephirah.id];
             return (
               <g key={sephirah.id}>

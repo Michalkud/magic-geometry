@@ -2,8 +2,9 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import AssociationCanvas, { SymbolAssociation } from '@/components/association/AssociationCanvas';
 import SymbolModal from '@/components/association/SymbolModal';
 import CircularLayout from '@/components/association/CircularLayout';
-import { TAROT_CARDS } from '@/data/cards';
-import { SYMBOL_REGISTRY, Symbol } from '@/data/symbols';
+import { useCards, useSymbolsByCard } from '@/db/hooks';
+import { initializeDatabase } from '@/db/db';
+import type { DBSymbol } from '@/db/types';
 
 interface CardAssociations {
   cardId: string;
@@ -32,6 +33,15 @@ export default function SymbolAssociationPage() {
   const [showToast, setShowToast] = useState<string | null>(null);
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  
+  // Database hooks
+  const cards = useCards();
+  const cardSymbols = useSymbolsByCard(selectedCard);
+
+  // Initialize database
+  useEffect(() => {
+    initializeDatabase();
+  }, []);
 
   // Load associations from localStorage
   useEffect(() => {
@@ -59,22 +69,24 @@ export default function SymbolAssociationPage() {
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
+  // Loading state
+  if (!cards || !cardSymbols) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p>Loading symbols...</p>
+        </div>
+      </div>
+    );
+  }
+
   // Get current card data
-  const currentCard = TAROT_CARDS.find(c => c.id === selectedCard);
+  const currentCard = cards.find(c => c.id === selectedCard);
   const currentAssociations = cardAssociations[selectedCard]?.associations || [];
 
-  // Get symbols for current card
-  // Map card id to symbol card id format
-  const currentCardObj = TAROT_CARDS.find(c => c.id === selectedCard);
-  const symbolCardId = currentCardObj 
-    ? `card-${currentCardObj.trumpNumber.toString().padStart(2, '0')}-${selectedCard}`
-    : selectedCard;
-  
-  const cardSymbols = Array.from(SYMBOL_REGISTRY.values())
-    .filter((symbol: Symbol) => 
-      symbol.appearances.some((app: any) => app.cardId === symbolCardId)
-    )
-    .slice(0, 12); // Limit to 12 symbols for better circular layout
+  // Limit to 12 symbols for better circular layout
+  const displaySymbols = (cardSymbols || []).slice(0, 12);
 
   // Handle drag start from symbol modal
   const handleDragStart = useCallback((symbolId: string, symbolName: string, x: number, y: number) => {
@@ -197,7 +209,7 @@ export default function SymbolAssociationPage() {
               onChange={(e) => setSelectedCard(e.target.value)}
               className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
             >
-              {TAROT_CARDS.filter(c => c.trumpNumber <= 21).map(card => (
+              {cards.filter(c => c.trumpNumber <= 21).map(card => (
                 <option key={card.id} value={card.id}>
                   {card.label}
                 </option>
@@ -224,7 +236,7 @@ export default function SymbolAssociationPage() {
             {/* Statistics */}
             <div data-testid="stats-panel" className="ml-auto text-sm text-gray-600">
               Associations: {currentAssociations.length} | 
-              Symbols Available: {cardSymbols.length}
+              Symbols Available: {displaySymbols.length}
             </div>
           </div>
         </div>
@@ -255,7 +267,7 @@ export default function SymbolAssociationPage() {
               centerY={containerDimensions.height / 2}
               radius={Math.max(250, Math.min(containerDimensions.width, containerDimensions.height) * 0.45 - 75)}
             >
-              {cardSymbols.map(symbol => (
+              {displaySymbols.map(symbol => (
                 <SymbolModal
                   key={symbol.id}
                   id={symbol.id}

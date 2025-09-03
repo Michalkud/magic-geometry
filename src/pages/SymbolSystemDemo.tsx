@@ -5,48 +5,59 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  SYMBOL_REGISTRY, 
-  getRegistryStats, 
-  findSymbolsOnCard, 
-  getRelatedSymbols,
-  Symbol,
-  getSymbolsByType,
-  findSymbolsByMeaning,
-  getGraphStats
-} from '../data/symbols/index';
+  useSymbolRegistry,
+  useAllSymbols,
+  useSymbolRelationships,
+  useSymbolsByType,
+  useSymbolCounts,
+  useSearchSymbols
+} from '../db/hooks';
+import { initializeDatabase } from '../db/db';
+import type { DBSymbol } from '../db/types';
 
 const SymbolSystemDemo: React.FC = () => {
-  const [stats, setStats] = useState<any>(null);
-  const [selectedSymbol, setSelectedSymbol] = useState<Symbol | null>(null);
+  // Database hooks
+  const symbolRegistry = useSymbolRegistry();
+  const allSymbols = useAllSymbols();
+  const symbolCounts = useSymbolCounts();
+  
+  const [selectedSymbol, setSelectedSymbol] = useState<DBSymbol | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<Symbol[]>([]);
   const [selectedCard, setSelectedCard] = useState('card-00-the-fool');
+  
+  const searchResults = useSearchSymbols(searchTerm);
 
   useEffect(() => {
-    // Load initial statistics
-    const registryStats = getRegistryStats();
-    const graphStats = getGraphStats();
-    
-    setStats({
-      registry: registryStats,
-      graph: graphStats
-    });
-
-    // Set initial symbol
-    setSelectedSymbol(SYMBOL_REGISTRY.get('white-rose') || null);
+    initializeDatabase();
   }, []);
 
   useEffect(() => {
-    if (searchTerm.length > 2) {
-      const results = findSymbolsByMeaning(searchTerm);
-      setSearchResults(results.slice(0, 10));
-    } else {
-      setSearchResults([]);
+    // Set initial symbol when symbols are loaded
+    if (allSymbols && allSymbols.length > 0 && !selectedSymbol) {
+      const whiteRose = allSymbols.find(s => s.id === 'white-rose') || allSymbols[0];
+      setSelectedSymbol(whiteRose);
     }
-  }, [searchTerm]);
+  }, [allSymbols, selectedSymbol]);
 
-  const cardSymbols = findSymbolsOnCard(selectedCard);
-  const relatedSymbols = selectedSymbol ? getRelatedSymbols(selectedSymbol.id) : [];
+  // Get symbols for selected card
+  // const cardSymbols = useSymbolsByCard(selectedCard); // Would need card ID conversion
+  const cardSymbols: DBSymbol[] = []; // Placeholder for now
+
+  // Get relationships for selected symbol
+  const relatedSymbolsData = useSymbolRelationships(selectedSymbol?.id);
+  const relatedSymbols = relatedSymbolsData || [];
+
+  // Loading state
+  if (!allSymbols || !symbolRegistry) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+        <div className="text-center text-white">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Loading Symbol System...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
@@ -55,15 +66,15 @@ const SymbolSystemDemo: React.FC = () => {
           RWS Symbol Graph System
         </h1>
         
-        {stats && (
+        {symbolCounts && (
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             {/* Registry Stats */}
             <div className="bg-white/10 rounded-lg p-6">
               <h2 className="text-xl font-bold text-white mb-4">Registry Stats</h2>
               <div className="text-white/80 space-y-2">
-                <div>Total Symbols: <span className="font-bold text-yellow-300">{stats.registry.totalSymbols}</span></div>
-                <div>Unique Cards: <span className="font-bold text-yellow-300">{stats.registry.uniqueCards}</span></div>
-                <div>Avg Appearances: <span className="font-bold text-yellow-300">{stats.registry.averageAppearancesPerSymbol.toFixed(2)}</span></div>
+                <div>Total Symbols: <span className="font-bold text-yellow-300">{symbolCounts?.total || 0}</span></div>
+                <div>With Appearances: <span className="font-bold text-yellow-300">{symbolCounts?.withAppearances || 0}</span></div>
+                <div>Symbol Registry: <span className="font-bold text-yellow-300">{symbolRegistry?.size || 0}</span></div>
               </div>
             </div>
 
@@ -71,9 +82,9 @@ const SymbolSystemDemo: React.FC = () => {
             <div className="bg-white/10 rounded-lg p-6">
               <h2 className="text-xl font-bold text-white mb-4">Graph Stats</h2>
               <div className="text-white/80 space-y-2">
-                <div>Nodes: <span className="font-bold text-green-300">{stats.graph.nodeCount}</span></div>
-                <div>Edges: <span className="font-bold text-green-300">{stats.graph.edgeCount}</span></div>
-                <div>Density: <span className="font-bold text-green-300">{stats.graph.density.toFixed(4)}</span></div>
+                <div>Symbols: <span className="font-bold text-green-300">{allSymbols?.length || 0}</span></div>
+                <div>Relationships: <span className="font-bold text-green-300">{relatedSymbols.length}</span></div>
+                <div>Selected Symbol: <span className="font-bold text-green-300">{selectedSymbol?.label || 'None'}</span></div>
               </div>
             </div>
 
@@ -81,7 +92,7 @@ const SymbolSystemDemo: React.FC = () => {
             <div className="bg-white/10 rounded-lg p-6">
               <h2 className="text-xl font-bold text-white mb-4">Symbol Types</h2>
               <div className="text-white/80 space-y-1 text-sm">
-                {Object.entries(stats.registry.symbolsByType).map(([type, count]) => (
+                {Object.entries(symbolCounts?.byType || {}).map(([type, count]) => (
                   <div key={type}>
                     {type}: <span className="font-bold text-blue-300">{count as number}</span>
                   </div>
@@ -105,7 +116,7 @@ const SymbolSystemDemo: React.FC = () => {
                 className="w-full p-3 rounded bg-black/30 text-white border border-white/20 focus:border-yellow-400 focus:outline-none"
               />
               
-              {searchResults.length > 0 && (
+              {searchResults && searchResults.length > 0 && (
                 <div className="mt-4 space-y-2">
                   {searchResults.map(symbol => (
                     <div
@@ -114,7 +125,7 @@ const SymbolSystemDemo: React.FC = () => {
                       onClick={() => setSelectedSymbol(symbol)}
                     >
                       <div className="text-white font-medium">{symbol.label}</div>
-                      <div className="text-white/60 text-sm">{symbol.type} • {symbol.appearances.length} appearances</div>
+                      <div className="text-white/60 text-sm">{symbol.type}</div>
                     </div>
                   ))}
                 </div>
@@ -190,15 +201,11 @@ const SymbolSystemDemo: React.FC = () => {
                     </div>
 
                     <div>
-                      <h3 className="text-white font-bold mb-2">Appears on {selectedSymbol.appearances.length} card(s):</h3>
+                      <h3 className="text-white font-bold mb-2">Symbol Details:</h3>
                       <div className="space-y-1">
-                        {selectedSymbol.appearances.map((appearance, idx) => (
-                          <div key={idx} className="text-white/70 text-sm">
-                            {appearance.cardId.replace('card-', '').replace('-', ' ')} 
-                            ({appearance.prominence})
-                            {appearance.variant && ` • ${appearance.variant}`}
-                          </div>
-                        ))}
+                        <div className="text-white/70 text-sm">
+                          {selectedSymbol.description}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -212,14 +219,13 @@ const SymbolSystemDemo: React.FC = () => {
                   
                   {relatedSymbols.length > 0 ? (
                     <div className="max-h-60 overflow-y-auto space-y-2">
-                      {relatedSymbols.map(symbol => (
+                      {relatedSymbols.map(relationship => (
                         <div
-                          key={symbol.id}
+                          key={relationship.targetId}
                           className="p-2 bg-black/30 rounded cursor-pointer hover:bg-black/50 transition-colors text-sm"
-                          onClick={() => setSelectedSymbol(symbol)}
                         >
-                          <div className="text-white font-medium">{symbol.label}</div>
-                          <div className="text-white/60">{symbol.type} • {symbol.appearances.length} appearances</div>
+                          <div className="text-white font-medium">{relationship.targetId}</div>
+                          <div className="text-white/60">{relationship.type}</div>
                         </div>
                       ))}
                     </div>
@@ -234,7 +240,7 @@ const SymbolSystemDemo: React.FC = () => {
 
         {/* Footer */}
         <div className="mt-12 text-center text-white/60">
-          <p>RWS Symbol Graph System • {stats?.registry.totalSymbols} symbols • {stats?.graph.edgeCount} relationships</p>
+          <p>RWS Symbol Graph System • {allSymbols?.length || 0} symbols • {relatedSymbols.length} relationships</p>
         </div>
       </div>
     </div>

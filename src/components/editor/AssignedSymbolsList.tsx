@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { Rectangle } from './HotspotCanvas';
-import { SYMBOL_REGISTRY } from '@/data/symbols/symbolRegistry';
-import { Symbol } from '@/data/symbols/types';
+import { useAllSymbols } from '@/db/hooks';
+import { initializeDatabase } from '@/db/db';
+import type { DBSymbol } from '@/db/types';
 
 export interface AssignedSymbolsListProps {
   hotspots: Rectangle[];
@@ -13,7 +14,7 @@ export interface AssignedSymbolsListProps {
 }
 
 interface AssignedSymbolInfo {
-  symbol: Symbol;
+  symbol: DBSymbol;
   hotspotIds: string[];
 }
 
@@ -25,20 +26,30 @@ export default function AssignedSymbolsList({
   showUnassignedFilter = false,
   onToggleUnassignedFilter,
 }: AssignedSymbolsListProps) {
+  // Database hooks
+  const allSymbols = useAllSymbols();
+  
+  useEffect(() => {
+    initializeDatabase();
+  }, []);
+
   // Group hotspots by symbol
   const assignedSymbols = useMemo(() => {
+    if (!allSymbols) return [];
+    
     const symbolMap = new Map<string, AssignedSymbolInfo>();
+    const symbolRegistry = new Map(allSymbols.map(s => [s.id, s]));
     
     hotspots.forEach(hotspot => {
       if (hotspot.symbolId) {
-        const symbol = SYMBOL_REGISTRY.get(hotspot.symbolId);
+        const symbol = symbolRegistry.get(hotspot.symbolId);
         if (symbol) {
           const existing = symbolMap.get(hotspot.symbolId);
           if (existing) {
             existing.hotspotIds.push(hotspot.id);
           } else {
             symbolMap.set(hotspot.symbolId, {
-              symbol: symbol as Symbol,
+              symbol: symbol,
               hotspotIds: [hotspot.id],
             });
           }
@@ -49,7 +60,7 @@ export default function AssignedSymbolsList({
     return Array.from(symbolMap.values()).sort((a, b) => 
       a.symbol.label.localeCompare(b.symbol.label)
     );
-  }, [hotspots]);
+  }, [hotspots, allSymbols]);
   
   const unassignedCount = useMemo(() => {
     return hotspots.filter(h => !h.symbolId).length;

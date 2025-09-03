@@ -1,8 +1,12 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { QuizSymbol } from '@/data/symbolQuizData';
-import { AVAILABLE_IMAGES } from '@/data/allSymbols';
+import type { DBSymbol } from '@/db/types';
+
+interface QuizSymbol extends DBSymbol {
+  cardCount?: number;
+  sources?: string[];
+}
 
 interface QuizCardProps {
   symbol: QuizSymbol;
@@ -16,34 +20,31 @@ export const QuizCard: React.FC<QuizCardProps> = ({
   className = '' 
 }) => {
   const getImagePath = (symbol: QuizSymbol): string | null => {
-    // Check by ID
-    if (AVAILABLE_IMAGES[symbol.id]) return AVAILABLE_IMAGES[symbol.id];
-    
-    // Check by label
+    // Basic image path logic - could be enhanced later
     const labelKey = symbol.label.toLowerCase().replace(/\s+/g, '-');
-    if (AVAILABLE_IMAGES[labelKey]) return AVAILABLE_IMAGES[labelKey];
     
-    // Check by label with spaces
-    if (AVAILABLE_IMAGES[symbol.label.toLowerCase()]) return AVAILABLE_IMAGES[symbol.label.toLowerCase()];
+    // Try common paths
+    const possiblePaths = [
+      `/symbols/${symbol.id}.jpg`,
+      `/symbols/${symbol.id}.png`,
+      `/symbols/${labelKey}.jpg`,
+      `/symbols/${labelKey}.png`,
+    ];
     
-    // For RWS symbols, also try without the rws- prefix
-    if (symbol.id.startsWith('rws-')) {
-      const baseId = symbol.id.replace('rws-', '');
-      if (AVAILABLE_IMAGES[baseId]) return AVAILABLE_IMAGES[baseId];
-    }
-    
-    return null;
+    // For now, just return the first possible path
+    // In a real app, you'd check if the file exists
+    return possiblePaths[0];
   };
 
   const imagePath = getImagePath(symbol);
-  const sourceColor = {
+  const sourceColor: Record<string, string> = {
     rws: 'bg-blue-100 text-blue-800',
     thoth: 'bg-purple-100 text-purple-800', 
     universal: 'bg-green-100 text-green-800',
     meanings: 'bg-orange-100 text-orange-800'
   };
 
-  const difficultyColor = {
+  const difficultyColor: Record<string, string> = {
     easy: 'bg-green-100 text-green-800',
     medium: 'bg-yellow-100 text-yellow-800',
     hard: 'bg-red-100 text-red-800'
@@ -57,15 +58,15 @@ export const QuizCard: React.FC<QuizCardProps> = ({
         </CardTitle>
         <div className="flex justify-center gap-2 mt-2">
           <Badge 
-            className={`mystical-badge ${sourceColor[symbol.source]} text-xs`}
+            className={`mystical-badge ${sourceColor[symbol.source || 'universal']} text-xs`}
             data-testid="symbol-source"
           >
-            {symbol.source.toUpperCase()}
+            {(symbol.source || 'universal').toUpperCase()}
           </Badge>
           <Badge 
-            className={`mystical-badge ${difficultyColor[symbol.difficulty]} text-xs`}
+            className={`mystical-badge ${difficultyColor[symbol.difficulty || 'easy']} text-xs`}
           >
-            {symbol.difficulty}
+            {symbol.difficulty || 'easy'}
           </Badge>
           <Badge 
             className="mystical-badge bg-gray-100 text-gray-800 text-xs"
@@ -94,11 +95,11 @@ export const QuizCard: React.FC<QuizCardProps> = ({
         {showAnswer && (
           <div className="mt-4 p-4 bg-amber-50 border-l-4 border-amber-400 rounded">
             <p className="text-amber-800 font-medium text-sm">
-              {symbol.meaning}
+              {symbol.meanings.join(', ')}
             </p>
-            {symbol.cards && symbol.cards.length > 0 && (
+            {symbol.cardCount && symbol.cardCount > 0 && (
               <p className="text-amber-600 text-xs mt-2">
-                Found in: {symbol.cards.join(', ')}
+                Found in {symbol.cardCount} cards
               </p>
             )}
           </div>

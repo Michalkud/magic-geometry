@@ -4,7 +4,14 @@ import { SEPHIROT, SEPHIROT_MEANINGS } from '../data/sephirot';
 import { MINOR_CARDS } from '../data/minors';
 import { CARD_MEANINGS } from '../data/cardMeanings';
 import { UNIVERSAL_SYMBOLS } from '../data/universalSymbols';
-import type { DBCard, DBSephirah, DBMinorCard, DBCardMeaning, DBSymbolDetail, DBSymbol } from './types';
+import { symbolRelationships } from '../data/symbols/relationships';
+import { RWS_CARD_SYMBOLS } from '../data/rwsCardSymbols';
+import { CARD_SYMBOLS } from '../data/cardSymbols';
+import { CARD_HOTSPOTS } from '../data/symbolHotspots';
+import { DECANS } from '../data/decans';
+import { MAJORS_META } from '../data/majorsMeta';
+import geometriesData from '../data/geometries.json';
+import type { DBCard, DBSephirah, DBMinorCard, DBCardMeaning, DBSymbolDetail, DBSymbol, DBRelationship, DBCardAppearance, DBHotspot, DBDecan, DBGeometry } from './types';
 
 export async function seedDatabase(): Promise<void> {
   await seedMajorArcana();
@@ -13,25 +20,33 @@ export async function seedDatabase(): Promise<void> {
   await seedCardMeanings();
   await seedUniversalSymbols();
   await seedCardSymbols();
+  await seedRelationships();
+  await seedCardAppearances();
+  await seedHotspots();
+  await seedDecans();
+  await seedGeometries();
 }
 
 async function seedMajorArcana(): Promise<void> {
-  const cards: DBCard[] = TAROT_CARDS.map(card => ({
-    id: card.id,
-    label: card.label,
-    trumpNumber: card.trumpNumber,
-    image: card.image,
-    pathA: card.path?.a,
-    pathB: card.path?.b,
-    hebrewLetter: card.hebrewLetter,
-    hebrewName: card.hebrewName,
-    element: card.element,
-    pathNumber: card.pathNumber,
-    note: card.note
-  }));
+  const cards: DBCard[] = TAROT_CARDS.map(card => {
+    const meta = MAJORS_META[card.id];
+    return {
+      id: card.id,
+      label: card.label,
+      trumpNumber: card.trumpNumber,
+      image: card.image,
+      pathA: card.path?.a,
+      pathB: card.path?.b,
+      hebrewLetter: meta?.hebrew || card.hebrewLetter,
+      hebrewName: card.hebrewName,
+      element: meta?.attribution || card.element,
+      pathNumber: card.pathNumber,
+      note: meta?.pathTitle || card.note
+    };
+  });
 
   await db.cards.bulkAdd(cards);
-  console.log(`Added ${cards.length} major arcana cards`);
+  console.log(`Added ${cards.length} major arcana cards with enhanced metadata`);
 }
 
 async function seedSephirot(): Promise<void> {
@@ -179,4 +194,108 @@ export async function resetDatabase(): Promise<void> {
   await clearDatabase();
   await seedDatabase();
   console.log('Database reset complete');
+}
+
+async function seedRelationships(): Promise<void> {
+  const relationships: DBRelationship[] = symbolRelationships.map(rel => ({
+    sourceId: rel.sourceId,
+    targetId: rel.targetId,
+    type: rel.relationshipType,
+    strength: rel.strength,
+    description: rel.description,
+    bidirectional: rel.bidirectional
+  }));
+
+  await db.relationships.bulkAdd(relationships);
+  console.log(`Added ${relationships.length} symbol relationships`);
+}
+
+async function seedCardAppearances(): Promise<void> {
+  const appearances: DBCardAppearance[] = [];
+  
+  // Process RWS symbols
+  Object.entries(RWS_CARD_SYMBOLS).forEach(([cardId, symbols]) => {
+    symbols.forEach(symbol => {
+      appearances.push({
+        symbolId: `rws-${symbol.id}`,
+        cardId: cardId,
+        x: symbol.x,
+        y: symbol.y,
+        prominence: 'primary' as const,
+        variant: 'rws'
+      });
+    });
+  });
+  
+  // Process Thoth symbols  
+  Object.entries(CARD_SYMBOLS).forEach(([cardId, symbols]) => {
+    symbols.forEach(symbol => {
+      appearances.push({
+        symbolId: `thoth-${symbol.id}`,
+        cardId: cardId,
+        x: symbol.x,
+        y: symbol.y,
+        prominence: 'primary' as const,
+        variant: 'thoth'
+      });
+    });
+  });
+
+  await db.cardAppearances.bulkAdd(appearances);
+  console.log(`Added ${appearances.length} card-symbol appearances`);
+}
+
+async function seedHotspots(): Promise<void> {
+  const hotspots: DBHotspot[] = [];
+  
+  Object.entries(CARD_HOTSPOTS).forEach(([cardId, cardHotspots]) => {
+    cardHotspots.forEach(hotspot => {
+      // Convert polygon to bounding box
+      const xCoords = hotspot.polygon.map(p => p[0]);
+      const yCoords = hotspot.polygon.map(p => p[1]);
+      const minX = Math.min(...xCoords);
+      const maxX = Math.max(...xCoords);
+      const minY = Math.min(...yCoords);
+      const maxY = Math.max(...yCoords);
+      
+      hotspots.push({
+        cardId: cardId,
+        symbolId: hotspot.key,
+        x: minX,
+        y: minY,
+        width: maxX - minX,
+        height: maxY - minY,
+        label: hotspot.key,
+        meaning: hotspot.meanings.join('; ')
+      });
+    });
+  });
+
+  await db.hotspots.bulkAdd(hotspots);
+  console.log(`Added ${hotspots.length} card hotspots`);
+}
+
+async function seedDecans(): Promise<void> {
+  const decans: DBDecan[] = DECANS.map(decan => ({
+    id: decan.id,
+    position: decan.number,
+    sign: decan.sign,
+    degreeRange: `${decan.degrees.start}-${decan.degrees.end}°`,
+    planet: decan.ruler,
+    minorCard: decan.cardId,
+    dates: `${decan.dates.start} - ${decan.dates.end}`
+  }));
+
+  await db.decans.bulkAdd(decans);
+  console.log(`Added ${decans.length} decans`);
+}
+
+async function seedGeometries(): Promise<void> {
+  const geometries: DBGeometry[] = geometriesData.geometries.map((geo: any) => ({
+    id: geo.id,
+    data: geo
+  }));
+
+  await db.geometries.bulkAdd(geometries);
+  console.log(`Added ${geometries.length} sacred geometry patterns`);
 }

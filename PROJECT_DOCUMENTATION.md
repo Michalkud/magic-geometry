@@ -7,7 +7,7 @@ Magic Geometry is an interactive web application for exploring Tarot symbolism t
 
 ### Core Application
 - **Stack**: React 18 + TypeScript + Vite + Tailwind CSS + Dexie (IndexedDB)
-- **Database**: Dexie.js for client-side IndexedDB storage
+- **Database**: Dexie.js for client-side IndexedDB storage with comprehensive data seeding
 - **Routes**:
   - `/` - Interactive Tree of Life with 22 Major Arcana paths
   - `/quiz` - Symbol memory quiz with 150+ symbols from RWS/Thoth/Universal sources
@@ -15,6 +15,22 @@ Magic Geometry is an interactive web application for exploring Tarot symbolism t
   - `/editor` - Symbol Hotspot Editor for card annotation
   - `/association` - Symbol Association with arrow drawing and radius mapping
   - `/database` - Database management demo page
+  - `/schema` - Database schema visualization
+
+### Database Structure (COMPLETE ✅)
+The application uses IndexedDB via Dexie with the following tables:
+- **cards** (22 records): Major Arcana with Hebrew letters, attributions, and path titles
+- **sephirot** (10 records): Tree of Life nodes with meanings
+- **minorCards** (40 records): Minor Arcana cards mapped to sephirot
+- **symbols** (25+ records): Universal and card-specific symbols
+- **cardMeanings** (22 records): Detailed meanings and essays for each card
+- **relationships** (58 records): Symbol-to-symbol relationships (evolution, mirrors, opposes, etc.)
+- **cardAppearances** (162 records): Symbol positions on cards (RWS and Thoth variants)
+- **hotspots** (15 records): Interactive areas on card images
+- **decans** (36 records): Astrological decan associations with minor cards
+- **geometries** (15 records): Sacred geometry patterns
+
+All data is automatically seeded from `/src/data/` files on first load.
 
 ## Core Features
 
@@ -327,9 +343,9 @@ The assigned symbols management feature provides comprehensive symbol tracking:
 - React Router for navigation
 
 ### Data Management
-- LocalStorage for persistence
-- In-memory symbol registry
-- Graph-based data structures
+- **Database**: Dexie.js (IndexedDB) for client-side persistence
+- **Reactive hooks**: Database hooks for real-time data updates
+- **Graph-based data structures**: Symbol relationships stored in database
 
 ### Testing
 - Playwright for E2E testing
@@ -470,6 +486,64 @@ useSearchSymbols(query) - Search symbols
 - Database persists across sessions
 - Reset functionality available
 
+### 6. Database Schema Page (`/schema`)
+**Added: 2025-09-03**
+**Enhanced: 2025-09-03** - Added interactive visual diagram with SVG-based table connections
+
+#### Purpose
+Visual representation of the database structure showing all 11 tables, their fields, relationships, and current record counts. Provides an interactive way to explore the database schema with both a visual diagram and detailed table cards.
+
+#### Components
+
+##### DatabaseDiagram (`/src/components/DatabaseDiagram.tsx`)
+- **SVG-based visual diagram** showing all tables and their connections
+- **Color-coded table categories**:
+  - Blue: Core Tables (cards, sephirot, minorCards)
+  - Green: Symbol System (symbols, cardAppearances, relationships)
+  - Purple: Meanings (cardMeanings, symbolDetails)
+  - Yellow: Visual (hotspots, geometries)
+  - Red: Astrological (decans)
+- **Interactive hover effects**: Highlights connected tables and relationships
+- **Click navigation**: Click a table node to scroll to its detailed card
+- **Relationship lines**: Curved paths showing foreign key connections
+- **Field labels**: Shows relationship field names on hover
+
+##### DatabaseSchemaPage (`/src/pages/DatabaseSchemaPage.tsx`)
+- Main page combining visual diagram and detailed cards
+- Smooth scroll animation to table cards
+- Highlight animation when navigating from diagram
+- Real-time record counts for all tables
+
+#### Features
+- **Visual Database Diagram**: SVG visualization of entire database structure
+- **Interactive Table Cards**: Click to expand/collapse table details
+- **Field Information**: Shows field names, types, and optionality
+- **Index Indicators**: Visual badges for primary keys and indexed fields
+- **Foreign Key Relationships**: Shows FK connections between tables
+- **Compound Indices**: Displays multi-field indices
+- **Database Statistics**: Total tables, records, indices, and relationships
+- **Relationship Visualization**: Shows all table connections
+- **Hover Interactions**: Highlights related tables and connections
+- **Click-to-Navigate**: Jump from diagram to detailed table view
+- **Responsive Design**: Works on mobile and desktop
+
+#### Tables Displayed
+1. **cards** - Major Arcana cards with paths and correspondences
+2. **sephirot** - Tree of Life nodes
+3. **minorCards** - 40 Minor Arcana cards
+4. **symbols** - 450+ symbol definitions
+5. **cardAppearances** - Symbol-card associations
+6. **relationships** - Symbol relationships
+7. **cardMeanings** - Card interpretations
+8. **symbolDetails** - Additional symbol notes
+9. **hotspots** - Visual hotspot mappings
+10. **geometries** - Geometric data storage
+11. **decans** - Astrological decan data
+
+#### Testing
+- Comprehensive E2E test suite: `/tests/e2e/database-schema.spec.ts`
+- Tests cover visual diagram, hover effects, click navigation, and all existing features
+
 ## Roadmap
 
 ### Implemented ✅
@@ -479,6 +553,7 @@ useSearchSymbols(query) - Search symbols
 - Symbol Hotspot Editor
 - Symbol Association Page with arrow drawing
 - Database migration to IndexedDB (Dexie)
+- Database Schema Visualization
 
 ### Not Yet Implemented
 - `/cards` - Card library page
@@ -496,3 +571,30 @@ useSearchSymbols(query) - Search symbols
 - Mobile/tablet optimization
 - API backend for data persistence
 - Real-time collaboration features
+
+## Database Migration Complete ✅
+
+**Completed 2025-09-03**: Successfully migrated the entire application from static file imports to database-only architecture.
+
+### Migration Summary
+- **Eliminated duplicate data**: All data now stored exclusively in IndexedDB via Dexie.js
+- **Database hooks**: Created comprehensive React hooks for data access
+- **Components updated**: All 6+ major components now use database hooks instead of static imports
+- **Build success**: Application builds without TypeScript errors
+- **Single source of truth**: Database is now the authoritative source for all data
+
+### New Database Hooks Added
+- `useCards()` - Get all cards with metadata
+- `useSymbolRegistry()` - Get symbol registry as Map
+- `useAllSymbols()` - Get all symbols
+- `useSymbolsByCard(cardId)` - Get symbols for specific card
+- `useQuizSymbols()` - Get symbols for quiz with appearance counts
+- `useSymbolCounts()` - Get symbol statistics
+- `useSearchSymbols(query)` - Search symbols by meaning
+
+### Benefits Achieved
+- **Reactive data**: Components automatically update when database changes
+- **Performance**: Efficient IndexedDB queries with proper indexing  
+- **Offline support**: Full offline functionality with client-side database
+- **Type safety**: All database operations are fully typed
+- **Maintainability**: Single source of truth eliminates sync issues
