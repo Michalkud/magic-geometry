@@ -10,6 +10,7 @@ export interface SymbolListProps {
 export default function SymbolList({ selectedSymbol, onSymbolSelect }: SymbolListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
+  const [filterCard, setFilterCard] = useState<string>('all');
   
   const symbols = Array.from(SYMBOL_REGISTRY.values()) as Symbol[];
   
@@ -22,13 +23,26 @@ export default function SymbolList({ selectedSymbol, onSymbolSelect }: SymbolLis
       
       const matchesType = filterType === 'all' || symbol.type === filterType;
       
-      return matchesSearch && matchesType;
+      const matchesCard = filterCard === 'all' || 
+        symbol.appearances.some(appearance => appearance.cardId === filterCard);
+      
+      return matchesSearch && matchesType && matchesCard;
     });
-  }, [symbols, searchTerm, filterType]);
+  }, [symbols, searchTerm, filterType, filterCard]);
   
   const symbolTypes = useMemo(() => {
     const types = new Set(symbols.map(s => s.type));
     return Array.from(types).sort();
+  }, [symbols]);
+  
+  const availableCards = useMemo(() => {
+    const cards = new Set<string>();
+    symbols.forEach(symbol => {
+      symbol.appearances.forEach(appearance => {
+        cards.add(appearance.cardId);
+      });
+    });
+    return Array.from(cards).sort();
   }, [symbols]);
   
   return (
@@ -55,6 +69,30 @@ export default function SymbolList({ selectedSymbol, onSymbolSelect }: SymbolLis
               {type.charAt(0).toUpperCase() + type.slice(1)}
             </option>
           ))}
+        </select>
+        
+        <select
+          data-testid="card-filter"
+          value={filterCard}
+          onChange={(e) => setFilterCard(e.target.value)}
+          className="w-full mt-2 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+        >
+          <option value="all">All Cards</option>
+          {availableCards.map(cardId => {
+            // Format card ID for display
+            const cardName = cardId.replace('card-', '').split('-')
+              .map(part => {
+                if (part.match(/^\d+$/)) return '';
+                return part.charAt(0).toUpperCase() + part.slice(1);
+              })
+              .filter(Boolean)
+              .join(' ');
+            return (
+              <option key={cardId} value={cardId}>
+                {cardName}
+              </option>
+            );
+          })}
         </select>
         
         <div className="mt-2 text-sm text-gray-400">

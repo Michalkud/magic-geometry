@@ -101,8 +101,11 @@ Enables users to annotate tarot card images by drawing rectangles around symbols
 - Browse all 454 symbols from the symbol registry
 - Real-time search functionality
 - Filter by symbol type (figure, animal, plant, celestial, etc.)
+- **Filter by card** - Show only symbols that appear in selected card (2025-09-03)
+- Combined filtering - Search, type, and card filters work together
 - Click to associate symbols with selected hotspots
 - Shows symbol descriptions and meanings
+- Displays filtered symbol count
 
 ##### CoordinateDisplay (`/src/components/editor/CoordinateDisplay.tsx`)
 - Shows normalized coordinates (0-1 range)
